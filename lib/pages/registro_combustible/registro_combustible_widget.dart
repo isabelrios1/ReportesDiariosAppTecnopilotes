@@ -580,122 +580,130 @@ class _RegistroCombustibleWidgetState extends State<RegistroCombustibleWidget> {
                                       Align(
                                         alignment:
                                             AlignmentDirectional(0.0, 0.0),
-                                        child: Container(
-                                          width: 320.0,
-                                          height: 70.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .accent2,
-                                            borderRadius:
-                                                BorderRadius.circular(20.0),
-                                          ),
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Align(
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  0.0, 10.0, 0.0, 0.0),
+                                          child: Container(
+                                            width: 320.0,
+                                            height: 70.0,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .accent2,
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                            ),
                                             alignment:
-                                                AlignmentDirectional(0.1, 0.0),
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      0.0, 0.0, 15.0, 0.0),
-                                              child: Container(
-                                                width: 150.0,
-                                                child: TextFormField(
-                                                  controller: _model
-                                                      .textFieldDateTextController,
-                                                  focusNode: _model
-                                                      .textFieldDateFocusNode,
-                                                  autofocus: false,
-                                                  readOnly: true,
-                                                  obscureText: false,
-                                                  decoration: InputDecoration(
-                                                    isDense: true,
-                                                    alignLabelWithHint: false,
-                                                    hintStyle: FlutterFlowTheme
-                                                            .of(context)
-                                                        .labelMedium
+                                                AlignmentDirectional(0.0, 0.0),
+                                            child: Align(
+                                              alignment: AlignmentDirectional(
+                                                  0.1, 0.0),
+                                              child: Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        0.0, 0.0, 15.0, 0.0),
+                                                child: Container(
+                                                  width: 150.0,
+                                                  child: TextFormField(
+                                                    controller: _model
+                                                        .textFieldDateTextController,
+                                                    focusNode: _model
+                                                        .textFieldDateFocusNode,
+                                                    autofocus: false,
+                                                    readOnly: true,
+                                                    obscureText: false,
+                                                    decoration: InputDecoration(
+                                                      isDense: true,
+                                                      alignLabelWithHint: false,
+                                                      hintStyle:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .labelMedium
+                                                              .override(
+                                                                font:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .labelMedium
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .labelMedium
+                                                                      .fontStyle,
+                                                                ),
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontStyle,
+                                                              ),
+                                                      enabledBorder:
+                                                          InputBorder.none,
+                                                      focusedBorder:
+                                                          InputBorder.none,
+                                                      errorBorder:
+                                                          InputBorder.none,
+                                                      focusedErrorBorder:
+                                                          InputBorder.none,
+                                                      contentPadding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  13.0,
+                                                                  0.0,
+                                                                  0.0,
+                                                                  0.0),
+                                                    ),
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
                                                         .override(
                                                           font:
                                                               GoogleFonts.inter(
                                                             fontWeight:
                                                                 FlutterFlowTheme.of(
                                                                         context)
-                                                                    .labelMedium
+                                                                    .bodyMedium
                                                                     .fontWeight,
                                                             fontStyle:
                                                                 FlutterFlowTheme.of(
                                                                         context)
-                                                                    .labelMedium
+                                                                    .bodyMedium
                                                                     .fontStyle,
                                                           ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          fontSize: 20.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
-                                                                  .labelMedium
+                                                                  .bodyMedium
                                                                   .fontWeight,
                                                           fontStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)
-                                                                  .labelMedium
+                                                                  .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                    enabledBorder:
-                                                        InputBorder.none,
-                                                    focusedBorder:
-                                                        InputBorder.none,
-                                                    errorBorder:
-                                                        InputBorder.none,
-                                                    focusedErrorBorder:
-                                                        InputBorder.none,
-                                                    contentPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(13.0, 0.0,
-                                                                0.0, 0.0),
+                                                    textAlign: TextAlign.start,
+                                                    cursorColor:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .primaryText,
+                                                    enableInteractiveSelection:
+                                                        false,
+                                                    validator: _model
+                                                        .textFieldDateTextControllerValidator
+                                                        .asValidator(context),
                                                   ),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .secondaryText,
-                                                        fontSize: 20.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
-                                                  textAlign: TextAlign.start,
-                                                  cursorColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .primaryText,
-                                                  enableInteractiveSelection:
-                                                      false,
-                                                  validator: _model
-                                                      .textFieldDateTextControllerValidator
-                                                      .asValidator(context),
                                                 ),
                                               ),
                                             ),
@@ -705,12 +713,29 @@ class _RegistroCombustibleWidgetState extends State<RegistroCombustibleWidget> {
                                       Align(
                                         alignment:
                                             AlignmentDirectional(-0.7, 0.0),
-                                        child: Text(
-                                          'Fecha:',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  0.0, 10.0, 0.0, 0.0),
+                                          child: Text(
+                                            'Fecha:',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  fontSize: 20.0,
+                                                  letterSpacing: 0.0,
                                                   fontWeight:
                                                       FlutterFlowTheme.of(
                                                               context)
@@ -722,17 +747,7 @@ class _RegistroCombustibleWidgetState extends State<RegistroCombustibleWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                fontSize: 20.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1013,6 +1028,10 @@ class _RegistroCombustibleWidgetState extends State<RegistroCombustibleWidget> {
                                                               .fontStyle,
                                                     ),
                                                 textAlign: TextAlign.start,
+                                                keyboardType:
+                                                    const TextInputType
+                                                        .numberWithOptions(
+                                                        decimal: true),
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,

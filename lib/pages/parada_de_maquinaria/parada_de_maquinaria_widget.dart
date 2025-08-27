@@ -1,8 +1,6 @@
-import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/form_field_controller.dart';
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -151,6 +149,91 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                                   .primary,
                                         ),
                                         child: CheckboxListTile(
+                                          value: _model.checkboxListTilValue ??=
+                                              false,
+                                          onChanged: (newValue) async {
+                                            safeSetState(() =>
+                                                _model.checkboxListTilValue =
+                                                    newValue!);
+                                          },
+                                          title: Text(
+                                            'Falla mecánica',
+                                            textAlign: TextAlign.start,
+                                            style: FlutterFlowTheme.of(context)
+                                                .titleLarge
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .titleLarge
+                                                            .fontStyle,
+                                                  ),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.normal,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleLarge
+                                                          .fontStyle,
+                                                ),
+                                          ),
+                                          tileColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .accent2,
+                                          activeColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .alternate,
+                                          checkColor:
+                                              FlutterFlowTheme.of(context).info,
+                                          dense: false,
+                                          controlAffinity:
+                                              ListTileControlAffinity.leading,
+                                          contentPadding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional(0.0, 0.0),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 20.0, 0.0, 0.0),
+                                  child: Container(
+                                    width: 320.0,
+                                    height: 70.0,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          FlutterFlowTheme.of(context).accent2,
+                                      borderRadius: BorderRadius.circular(20.0),
+                                    ),
+                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: Theme(
+                                        data: ThemeData(
+                                          checkboxTheme: CheckboxThemeData(
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                          ),
+                                          unselectedWidgetColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .primary,
+                                        ),
+                                        child: CheckboxListTile(
                                           value: _model
                                               .checkboxListTileValue1 ??= false,
                                           onChanged: (newValue) async {
@@ -159,7 +242,7 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                                     newValue!);
                                           },
                                           title: Text(
-                                            'Falla mecánica',
+                                            'Falta de frente',
                                             textAlign: TextAlign.start,
                                             style: FlutterFlowTheme.of(context)
                                                 .titleLarge
@@ -244,7 +327,7 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                                     newValue!);
                                           },
                                           title: Text(
-                                            'Falta de frente',
+                                            'Falta liberación',
                                             textAlign: TextAlign.start,
                                             style: FlutterFlowTheme.of(context)
                                                 .titleLarge
@@ -329,7 +412,93 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                                     newValue!);
                                           },
                                           title: Text(
-                                            'Falta liberación',
+                                            'Falta operador',
+                                            textAlign: TextAlign.start,
+                                            style: FlutterFlowTheme.of(context)
+                                                .titleLarge
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .titleLarge
+                                                            .fontStyle,
+                                                  ),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.normal,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleLarge
+                                                          .fontStyle,
+                                                ),
+                                          ),
+                                          tileColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .accent2,
+                                          activeColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .alternate,
+                                          checkColor:
+                                              FlutterFlowTheme.of(context).info,
+                                          dense: false,
+                                          controlAffinity:
+                                              ListTileControlAffinity.leading,
+                                          contentPadding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional(0.0, 0.0),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 20.0, 0.0, 0.0),
+                                  child: Container(
+                                    width: 320.0,
+                                    height: 70.0,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          FlutterFlowTheme.of(context).accent2,
+                                      borderRadius: BorderRadius.circular(20.0),
+                                    ),
+                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: Theme(
+                                        data: ThemeData(
+                                          checkboxTheme: CheckboxThemeData(
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                          ),
+                                          unselectedWidgetColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .primary,
+                                        ),
+                                        child: CheckboxListTile(
+                                          value: _model
+                                                  .checkboxListTileMantenimientoValue ??=
+                                              false,
+                                          onChanged: (newValue) async {
+                                            safeSetState(() => _model
+                                                    .checkboxListTileMantenimientoValue =
+                                                newValue!);
+                                          },
+                                          title: Text(
+                                            'Mantenimiento preventivo',
                                             textAlign: TextAlign.start,
                                             style: FlutterFlowTheme.of(context)
                                                 .titleLarge
@@ -411,155 +580,6 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                           onChanged: (newValue) async {
                                             safeSetState(() =>
                                                 _model.checkboxListTileValue4 =
-                                                    newValue!);
-                                          },
-                                          title: Text(
-                                            'Falta operador',
-                                            textAlign: TextAlign.start,
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleLarge
-                                                .override(
-                                                  font: GoogleFonts.interTight(
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .titleLarge
-                                                            .fontStyle,
-                                                  ),
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.normal,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .titleLarge
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                          tileColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .accent2,
-                                          activeColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .alternate,
-                                          checkColor:
-                                              FlutterFlowTheme.of(context).info,
-                                          dense: false,
-                                          controlAffinity:
-                                              ListTileControlAffinity.leading,
-                                          contentPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  12.0, 0.0, 12.0, 0.0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 20.0, 0.0, 0.0),
-                                  child: FlutterFlowDropDown<String>(
-                                    controller:
-                                        _model.dropDownValueController ??=
-                                            FormFieldController<String>(
-                                      _model.dropDownValue ??= '',
-                                    ),
-                                    options: List<String>.from([
-                                      'Mantenimiento preventivo ',
-                                      'Mantenimiento correctivo'
-                                    ]),
-                                    optionLabels: [
-                                      'Mantenimiento preventivo ',
-                                      'Mantenimiento correctivo '
-                                    ],
-                                    onChanged: (val) => safeSetState(
-                                        () => _model.dropDownValue = val),
-                                    width: 320.0,
-                                    height: 70.0,
-                                    menuOffset: Offset(0, -8.0),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          fontSize: 20.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                    hintText: '  Mantenimiento',
-                                    fillColor:
-                                        FlutterFlowTheme.of(context).accent2,
-                                    elevation: 1.0,
-                                    borderColor: Colors.transparent,
-                                    borderWidth: 0.0,
-                                    borderRadius: 20.0,
-                                    margin: EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
-                                    hidesUnderline: true,
-                                    isOverButton: false,
-                                    isSearchable: false,
-                                    isMultiSelect: false,
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 20.0, 0.0, 0.0),
-                                  child: Container(
-                                    width: 320.0,
-                                    height: 70.0,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          FlutterFlowTheme.of(context).accent2,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: Theme(
-                                        data: ThemeData(
-                                          checkboxTheme: CheckboxThemeData(
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                            materialTapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
-                                          ),
-                                          unselectedWidgetColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .primary,
-                                        ),
-                                        child: CheckboxListTile(
-                                          value: _model
-                                              .checkboxListTileValue5 ??= false,
-                                          onChanged: (newValue) async {
-                                            safeSetState(() =>
-                                                _model.checkboxListTileValue5 =
                                                     newValue!);
                                           },
                                           title: Text(
@@ -645,41 +665,13 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                             ),
                                             child: CheckboxListTile(
                                               value: _model
-                                                      .checkboxListTileValue6 ??=
+                                                      .checkboxListTileOtrosValue ??=
                                                   false,
                                               onChanged: (newValue) async {
                                                 safeSetState(() => _model
-                                                        .checkboxListTileValue6 =
+                                                        .checkboxListTileOtrosValue =
                                                     newValue!);
                                               },
-                                              title: Text(
-                                                'Otros:',
-                                                textAlign: TextAlign.start,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleLarge
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .interTight(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .normal,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleLarge
-                                                                    .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleLarge
-                                                                  .fontStyle,
-                                                        ),
-                                              ),
                                               tileColor:
                                                   FlutterFlowTheme.of(context)
                                                       .accent2,
@@ -708,50 +700,58 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.41, 0.0),
+                                    alignment: AlignmentDirectional(0.25, 0.0),
                                     child: Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 43.0, 15.0, 0.0),
+                                          0.0, 41.7, 15.0, 0.0),
                                       child: Container(
-                                        width: 150.0,
+                                        width: 230.0,
                                         child: TextFormField(
                                           controller: _model
                                               .textFieldOtrosTextController,
                                           focusNode:
                                               _model.textFieldOtrosFocusNode,
                                           autofocus: false,
+                                          readOnly: _model
+                                                  .checkboxListTileOtrosValue ==
+                                              false,
                                           obscureText: false,
                                           decoration: InputDecoration(
                                             isDense: true,
                                             alignLabelWithHint: false,
-                                            hintStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .override(
-                                                      font: GoogleFonts.inter(
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                      ),
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontStyle,
-                                                    ),
+                                            hintText: 'Otros:',
+                                            hintStyle: FlutterFlowTheme.of(
+                                                    context)
+                                                .labelMedium
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .labelMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .labelMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  fontSize: 20.0,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .labelMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .labelMedium
+                                                          .fontStyle,
+                                                ),
                                             enabledBorder: InputBorder.none,
                                             focusedBorder: InputBorder.none,
                                             errorBorder: InputBorder.none,
@@ -764,7 +764,7 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
-                                                font: GoogleFonts.inter(
+                                                font: GoogleFonts.interTight(
                                                   fontWeight:
                                                       FlutterFlowTheme.of(
                                                               context)
@@ -778,7 +778,7 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                                                 ),
                                                 color:
                                                     FlutterFlowTheme.of(context)
-                                                        .secondaryText,
+                                                        .primary,
                                                 fontSize: 20.0,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
@@ -877,7 +877,15 @@ class _ParadaDeMaquinariaWidgetState extends State<ParadaDeMaquinariaWidget> {
                   alignment: AlignmentDirectional(0.0, 1.01),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      context.pushNamed(HorasYKilometrajesWidget.routeName);
+                      if (_model.checkboxListTileMantenimientoValue == true) {
+                        context
+                            .pushNamed(RegistroMantenimientoWidget.routeName);
+                      } else {
+                        if (_model.formKey.currentState == null ||
+                            !_model.formKey.currentState!.validate()) {
+                          return;
+                        }
+                      }
                     },
                     text: 'Confirmar',
                     options: FFButtonOptions(
