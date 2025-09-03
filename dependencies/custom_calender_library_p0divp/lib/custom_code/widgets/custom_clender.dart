@@ -3,6 +3,7 @@ import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'index.dart'; // Imports other custom widgets
 import 'package:flutter/material.dart';
+import 'package:reportes_diarios/app_state.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -41,7 +42,7 @@ class _CustomClendertState extends State<CustomClender> {
               widget.d = newDate;
               print(widget.d);
               FFAppState().update(() {
-                FFAppState().date = widget.d;
+                FFAppState().date = widget.d!.toIso8601String();
               });
             });
           },
