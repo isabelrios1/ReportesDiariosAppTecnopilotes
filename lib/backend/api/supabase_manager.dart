@@ -19,4 +19,6 @@ class SupabaseManager{
       throw Exception('Error de conexión con Supabase: $e');
     }
   }
+
+  void handleSupabaseError(Object e) {}
 }
