@@ -1,34 +1,22 @@
-// backend/api/supabase_manager.dart
+// lib/backend/api/supabase_manager.dart
+import 'package:reportes_diarios/backend/api/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SupabaseManager {
-  static final SupabaseManager _instance = SupabaseManager._internal();
-  factory SupabaseManager() => _instance;
-  SupabaseManager._internal();
+class SupabaseManager{
+  final SupabaseClient client;
 
-  // ✅ Cambiar a método getter que verifica inicialización
-  SupabaseClient get client {
-    if (!Supabase.instance.isInitialized) {
-      throw Exception('Supabase no inicializado. Llama a ensureConnected() primero');
-    }
-    return Supabase.instance.client;
-  }
-
-  bool get isConnected => Supabase.instance.isInitialized;
-
-  String? get userId => isConnected ? client.auth.currentUser?.id : null;
+  SupabaseManager() : client = SupabaseService.client;
 
   Future<void> ensureConnected() async {
-    if (!isConnected) {
-      await Supabase.initialize(
-        url: 'https://velslnijjypssjehoucj.supabase.co',
-        anonKey: 'tu-publishable-key-aqui',
-      );
+    if (!SupabaseService.isInitialized) {
+      throw Exception('Supabase no está inicializado. Llama a SupabaseService.initialize() primero');
     }
-  }
 
-  void handleSupabaseError(Exception e) {
-    print('Error de Supabase: $e');
-    throw Exception('Error de conexión: $e');
+    try {
+      // Consulta de prueba para verificar conexión
+      await client.from('maquinaria').select('count').limit(1);
+    } catch (e) {
+      throw Exception('Error de conexión con Supabase: $e');
+    }
   }
 }

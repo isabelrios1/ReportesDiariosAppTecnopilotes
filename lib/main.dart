@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'flutter_flow/flutter_flow_util.dart';
-import 'backend/api/supabase_manager.dart'; // ← IMPORT de tu SupabaseManager
+import 'backend/api/supabase_manager.dart';
+import 'backend/api/supabase_service.dart';// ← IMPORT de tu SupabaseManager
 
 import 'package:cupertino_time_picker_hiuzb7/app_state.dart'
 as cupertino_time_picker_hiuzb7_app_state;
@@ -14,33 +15,22 @@ Future<void> testSupabaseConnection() async {
 
   try {
     final supabase = SupabaseManager();
-    
     await supabase.ensureConnected();
 
     // Probamos con una consulta simple
     final response = await supabase.client
-        .from('maquinas')
+        .from('maquinaria')
         .select('*')
         .limit(1);
 
     debugPrint('✅ SUPABASE_MANAGER FUNCIONANDO!');
-    debugPrint('📋 Response: $response');
-
-    // Probamos también el manejo de errores
-    debugPrint('🧪 Probando manejo de errores...');
-    try {
-      await supabase.client
-          .from('tabla_que_no_existe')
-          .select('*');
-    } catch (e) {
-      debugPrint('✅ Manejo de errores funcionando');
-    }
+    debugPrint('📋 Response: ${response.length} registros');
 
   } catch (e) {
     debugPrint('❌ ERROR CON SUPABASE_MANAGER: $e');
     debugPrint('💡 Verifica:');
-    debugPrint('   - Tu SupabaseManager está bien configurado');
-    debugPrint('   - Las credenciales en SupabaseManager');
+    debugPrint('   - Que Supabase está inicializado');
+    debugPrint('   - Las credenciales en SupabaseService');
     debugPrint('   - La conexión a internet');
   }
 }
@@ -50,8 +40,19 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
-  // ← PRUEBA DE TU SUPABASE_MANAGER
-  await testSupabaseConnection();
+  try {
+    // ✅ PRIMERO inicializar Supabase (esto es lo más importante)
+    debugPrint('🚀 Inicializando Supabase...');
+    await SupabaseService.initialize();
+    debugPrint('✅ Supabase inicializado correctamente');
+
+    // ← LUEGO probar la conexión
+    await testSupabaseConnection();
+
+  } catch (e) {
+    debugPrint('❌ ERROR crítico en inicialización: $e');
+    // Puedes decidir si quieres continuar o no
+  }
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
