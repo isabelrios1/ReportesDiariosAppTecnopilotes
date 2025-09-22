@@ -1,10 +1,10 @@
 import '../supabase_manager.dart';
-import '../../schema/structs/maquina.dart';
-import '../../schema/structs/empleado.dart';
-import '../../schema/structs/obras.dart';
-import '../../schema/structs/repuestos.dart';
-import '../../schema/structs/servicio.dart';
-import '../../schema/structs/descripcion_trabajo.dart';
+import '../../schema/structs/catalogo/maquina.dart';
+import '../../schema/structs/catalogo/empleado.dart';
+import '../../schema/structs/catalogo/obras.dart';
+import '../../schema/structs/catalogo/repuestos.dart';
+import '../../schema/structs/catalogo/servicio.dart';
+import '../../schema/structs/catalogo/descripcion_trabajo.dart';
 
 
 class CatalogoRepository {

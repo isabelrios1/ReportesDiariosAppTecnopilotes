@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
-import 'backend/schema/structs/empleado.dart';
-import 'backend/schema/structs/obras.dart';
-import 'backend/schema/structs/repuestos.dart';
-import 'backend/schema/structs/servicio.dart';
+import 'backend/schema/structs/catalogo/empleado.dart';
+import 'backend/schema/structs/catalogo/obras.dart';
+import 'backend/schema/structs/catalogo/repuestos.dart';
+import 'backend/schema/structs/catalogo/servicio.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 // ↓ AÑADE ESTAS IMPORTACIONES
 import 'backend/api/supabase_manager.dart';
 import 'backend/api/repositories/catalogo_repo.dart';
 import 'backend/api/services/catalogo_service.dart';
-import 'backend/schema/structs/descripcion_trabajo.dart';
+import 'backend/schema/structs/catalogo/descripcion_trabajo.dart';
 
 import 'package:cupertino_time_picker_hiuzb7/app_state.dart'
 as cupertino_time_picker_hiuzb7_app_state;

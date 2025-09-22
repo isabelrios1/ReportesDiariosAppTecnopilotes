@@ -1,10 +1,10 @@
-import 'package:reportes_diarios/backend/schema/structs/empleado.dart';
+import 'package:reportes_diarios/backend/schema/structs/catalogo/empleado.dart';
 import 'package:collection/collection.dart';
-import '../../schema/structs/obras.dart';
-import '../../schema/structs/repuestos.dart';
-import '../../schema/structs/servicio.dart';
+import '../../schema/structs/catalogo/obras.dart';
+import '../../schema/structs/catalogo/repuestos.dart';
+import '../../schema/structs/catalogo/servicio.dart';
 import '../repositories/catalogo_repo.dart';
-import '../../schema/structs/descripcion_trabajo.dart';
+import '../../schema/structs/catalogo/descripcion_trabajo.dart';
 
 class CatalogoService {
   final CatalogoRepository catalogoRepo;
