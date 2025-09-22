@@ -1,7 +1,7 @@
-// lib/backend/api/services/catalogo_service.dart
 import 'package:reportes_diarios/backend/schema/structs/empleado.dart';
 import 'package:collection/collection.dart';
 import '../../schema/structs/obras.dart';
+import '../../schema/structs/repuestos.dart';
 import '../../schema/structs/servicio.dart';
 import '../repositories/catalogo_repo.dart';
 import '../../schema/structs/descripcion_trabajo.dart';
@@ -351,4 +351,185 @@ class CatalogoService {
     return codigo.length >= 1; // Mínimo 1 carácter
   }
 
+// ================================== REPUESTOS =================================
+  Future<List<repuestos>> getRepuestos() async {
+    return await catalogoRepo.getRepuestos();
+  }
+
+  Future<List<repuestos>> buscarRepuestos(String query) async {
+    if (query.isEmpty) {
+      return await getRepuestos(); // Si no hay query, devolver todos
+    }
+
+    if (query.length < 2) {
+      throw Exception('Ingresa al menos 2 caracteres para buscar');
+    }
+
+    return await catalogoRepo.buscarRepuestos(query);
+  }
+
+  Future<List<repuestos>> getRepuestosPorModelo(String modelo) async {
+    if (modelo.isEmpty) {
+      throw Exception('El modelo no puede estar vacío');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.where((repuesto) =>
+        repuesto.modelo.toLowerCase().contains(modelo.toLowerCase())
+    ).toList();
+  }
+
+  Future<List<repuestos>> getRepuestosPorComponente(String componente) async {
+    if (componente.isEmpty) {
+      throw Exception('El componente no puede estar vacío');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.where((repuesto) =>
+        repuesto.componente.toLowerCase().contains(componente.toLowerCase())
+    ).toList();
+  }
+
+  Future<repuestos?> getRepuestoExacto(String modelo, String componente) async {
+    if (modelo.isEmpty || componente.isEmpty) {
+      throw Exception('Modelo y componente son requeridos');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.firstWhereOrNull((repuesto) =>
+    repuesto.modelo.toLowerCase() == modelo.toLowerCase() &&
+        repuesto.componente.toLowerCase() == componente.toLowerCase()
+    );
+  }
+
+  // Para dropdowns en UI - formato optimizado
+  Future<List<Map<String, dynamic>>> getRepuestosParaDropdown() async {
+    final repuestos = await catalogoRepo.getRepuestos();
+
+    return repuestos.map((rep) => {
+      'value': '${rep.modelo}|${rep.componente}', // ← Clave compuesta
+      'label': '${rep.modelo} - ${rep.componente} - \$${rep.ultimaCotizacion}',
+      'object': rep, // Objeto completo por si se necesita
+      'precio': rep.ultimaCotizacion, // Para mostrar precio
+    }).toList();
+  }
+
+  // Buscar repuestos por rango de precio
+  Future<List<repuestos>> getRepuestosPorRangoPrecio(double min, double max) async {
+    if (min < 0 || max < 0 || min > max) {
+      throw Exception('Rango de precio inválido');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.where((repuesto) =>
+    repuesto.ultimaCotizacion >= min && repuesto.ultimaCotizacion <= max
+    ).toList();
+  }
+
+  // Buscar repuestos con precio mayor a
+  Future<List<repuestos>> getRepuestosPrecioMayorA(double precio) async {
+    if (precio < 0) {
+      throw Exception('El precio no puede ser negativo');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.where((repuesto) =>
+    repuesto.ultimaCotizacion > precio
+    ).toList();
+  }
+
+  // Buscar repuestos con precio menor a
+  Future<List<repuestos>> getRepuestosPrecioMenorA(double precio) async {
+    if (precio < 0) {
+      throw Exception('El precio no puede ser negativo');
+    }
+
+    final todosRepuestos = await catalogoRepo.getRepuestos();
+    return todosRepuestos.where((repuesto) =>
+    repuesto.ultimaCotizacion < precio
+    ).toList();
+  }
+
+  // Validar si un repuesto existe
+  Future<bool> existeRepuesto(String modelo, String componente) async {
+    final repuesto = await getRepuestoExacto(modelo, componente);
+    return repuesto != null;
+  }
+
+  // Filtrar repuestos válidos (con datos completos)
+  Future<List<repuestos>> getRepuestosValidos() async {
+    final todos = await catalogoRepo.getRepuestos();
+    return todos.where((rep) => rep.esValido).toList();
+  }
+
+  // Obtener sugerencias para autocompletado
+  Future<List<String>> getSugerenciasModelos() async {
+    final repuestos = await catalogoRepo.getRepuestos();
+    return repuestos.map((rep) => rep.modelo).toSet().toList(); // Unique
+  }
+
+  Future<List<String>> getSugerenciasComponentes() async {
+    final repuestos = await catalogoRepo.getRepuestos();
+    return repuestos.map((rep) => rep.componente).toSet().toList(); // Unique
+  }
+
+  // Obtener precios estadísticos
+  Future<Map<String, dynamic>> getEstadisticasPrecios() async {
+    final repuestos = await catalogoRepo.getRepuestos();
+
+    if (repuestos.isEmpty) {
+      return {'promedio': 0.0, 'maximo': 0.0, 'minimo': 0.0, 'total': 0};
+    }
+
+    final precios = repuestos.map((r) => r.ultimaCotizacion).toList();
+    final promedio = precios.reduce((a, b) => a + b) / precios.length;
+    final maximo = precios.reduce((a, b) => a > b ? a : b);
+    final minimo = precios.reduce((a, b) => a < b ? a : b);
+
+    return {
+      'promedio': promedio,
+      'maximo': maximo,
+      'minimo': minimo,
+      'total': repuestos.length,
+    };
+  }
+
+  // Obtener repuestos ordenados por precio
+  Future<List<repuestos>> getRepuestosOrdenadosPorPrecio({bool ascendente = true}) async {
+    final repuestos = await catalogoRepo.getRepuestos();
+    repuestos.sort((a, b) => ascendente
+        ? a.ultimaCotizacion.compareTo(b.ultimaCotizacion)
+        : b.ultimaCotizacion.compareTo(a.ultimaCotizacion)
+    );
+    return repuestos;
+  }
+
+  // Obtener repuestos ordenados por modelo
+  Future<List<repuestos>> getRepuestosOrdenadosPorModelo({bool ascendente = true}) async {
+    final repuestos = await catalogoRepo.getRepuestos();
+    repuestos.sort((a, b) => ascendente
+        ? a.modelo.compareTo(b.modelo)
+        : b.modelo.compareTo(a.modelo)
+    );
+    return repuestos;
+  }
+
+  // Validar formato de precio
+  bool validarPrecio(double precio) {
+    return precio >= 0;
+  }
+
+  // Obtener repuestos únicos por modelo (sin duplicados)
+  Future<List<repuestos>> getModelosUnicos() async {
+    final listaRepuestos = await catalogoRepo.getRepuestos(); // ← Cambiar nombre
+    final modelosUnicos = <String, repuestos>{}; // ← Ahora sí es el tipo
+
+    for (final repuesto in listaRepuestos) { // ← Usar nuevo nombre
+      if (!modelosUnicos.containsKey(repuesto.modelo)) {
+        modelosUnicos[repuesto.modelo] = repuesto;
+      }
+    }
+
+    return modelosUnicos.values.toList();
+  }
 }

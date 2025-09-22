@@ -2,7 +2,7 @@ import '../supabase_manager.dart';
 import '../../schema/structs/maquina.dart';
 import '../../schema/structs/empleado.dart';
 import '../../schema/structs/obras.dart';
-import '../../schema/structs/repuesto.dart';
+import '../../schema/structs/repuestos.dart';
 import '../../schema/structs/servicio.dart';
 import '../../schema/structs/descripcion_trabajo.dart';
 
@@ -170,6 +170,57 @@ class CatalogoRepository {
 
       return data.map<servicios>((json) =>
           servicios.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+
+//================================= REPUESTOS =================================
+
+  Future<List<repuestos>> getRepuestos() async {
+    try {
+      final data = await supabase.client
+          .from('repuestos')
+          .select('modelo, componente, ultimaCotizacion')  // ← Solo los campos que necesitas
+          .order('modelo');
+
+      return data.map<repuestos>((json) =>
+          repuestos.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  Future<List<repuestos>> buscarRepuestos(String query) async {
+    try {
+      // Verificar si la query es numérica (para buscar por precio)
+      final esNumerico = double.tryParse(query) != null;
+
+      if (esNumerico) {
+        // Buscar por precio exacto si la query es numérica
+        final precio = double.parse(query);
+        final data = await supabase.client
+            .from('repuestos')
+            .select('modelo, componente, ultimaCotizacion')
+            .eq('ultimaCotizacion', precio) // ← Usar eq para números
+            .order('modelo');
+
+        return data.map<repuestos>((json) =>
+            repuestos.fromJson(json)).toList();
+      } else {
+        // Buscar por texto si no es numérico
+        final data = await supabase.client
+            .from('repuestos')
+            .select('modelo, componente, ultimaCotizacion')
+            .or('modelo.ilike.%$query%,componente.ilike.%$query%')
+            .order('modelo');
+
+        return data.map<repuestos>((json) =>
+            repuestos.fromJson(json)).toList();
+      }
     } catch (e) {
       supabase.handleSupabaseError(e);
       rethrow;

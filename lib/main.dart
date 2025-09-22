@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
 import 'backend/schema/structs/empleado.dart';
 import 'backend/schema/structs/obras.dart';
+import 'backend/schema/structs/repuestos.dart';
 import 'backend/schema/structs/servicio.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 // ↓ AÑADE ESTAS IMPORTACIONES
@@ -18,18 +19,20 @@ as cupertino_time_picker_hiuzb7_app_state;
 
 // ↓ AÑADE ESTA FUNCIÓN DE PRUEBA
 
-Future<void> probarCRUDServicios() async {
-  debugPrint('🧪 Probando CRUD completo de Servicios...');
+Future<void> probarCRUDRepuestos() async {
+  debugPrint('🧪 Probando CRUD completo de Repuestos...');
 
   // Datos de prueba
-  final testServicio = servicios(
-      codigo: 'TEST-001',
-      descripcion: 'Servicio de Prueba CRUD'
+  final testRepuesto = repuestos(
+      modelo: 'TEST-MODELO-001',
+      componente: 'Componente de Prueba CRUD',
+      ultimaCotizacion: 150.75
   );
 
-  final testServicioActualizado = servicios(
-      codigo: 'TEST-001',
-      descripcion: 'Servicio de Prueba ACTUALIZADO'
+  final testRepuestoActualizado = repuestos(
+      modelo: 'TEST-MODELO-001',
+      componente: 'Componente de Prueba ACTUALIZADO',
+      ultimaCotizacion: 199.99
   );
 
   try {
@@ -44,95 +47,99 @@ Future<void> probarCRUDServicios() async {
     debugPrint('✅ Conexión establecida');
 
     final catalogoRepo = CatalogoRepository(supabase);
-    final servicioService = CatalogoService(catalogoRepo);
+    final repuestoService = CatalogoService(catalogoRepo);
 
     // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS
     debugPrint('2. 🧹 Limpiando datos de prueba previos...');
     try {
       await supabase.client
-          .from('servicios')
+          .from('repuestos')
           .delete()
-          .eq('codigo', 'TEST-001');
+          .eq('modelo', 'TEST-MODELO-001');
       debugPrint('✅ Datos previos limpiados');
     } catch (e) {
       debugPrint('⚠️ No se pudieron limpiar datos previos: $e');
     }
 
     // ========== CREATE ==========
-    debugPrint('3. 📝 Probando CREATE (Insertar servicio)...');
+    debugPrint('3. 📝 Probando CREATE (Insertar repuesto)...');
     try {
       final insertResponse = await supabase.client
-          .from('servicios')
+          .from('repuestos')
           .insert({
-        'codigo': testServicio.codigo,
-        'descripcion': testServicio.descripcion,
+        'modelo': testRepuesto.modelo,
+        'componente': testRepuesto.componente,
+        'ultimaCotizacion': testRepuesto.ultimaCotizacion,
       })
           .select();
 
-      debugPrint('✅ INSERT exitoso: ${insertResponse.length} servicios insertados');
+      debugPrint('✅ INSERT exitoso: ${insertResponse.length} repuestos insertados');
       debugPrint('   Datos insertados: ${insertResponse.first}');
 
     } catch (e) {
       debugPrint('❌ ERROR en INSERT: $e');
       debugPrint('💡 Verifica:');
-      debugPrint('   - Permisos RLS en tabla servicios');
-      debugPrint('   - Estructura de la tabla (campos codigo, descripcion)');
-      debugPrint('   - Si el código TEST-001 ya existe');
+      debugPrint('   - Permisos RLS en tabla repuestos');
+      debugPrint('   - Estructura de la tabla (campos modelo, componente, ultimaCotizacion)');
+      debugPrint('   - Si el modelo TEST-MODELO-001 ya existe');
       return;
     }
 
     // ========== READ ==========
-    debugPrint('4. 📖 Probando READ (Leer servicios)...');
+    debugPrint('4. 📖 Probando READ (Leer repuestos)...');
 
-    // a) Leer todos los servicios
-    final todosServicios = await servicioService.getServicios();
-    debugPrint('✅ READ todas: ${todosServicios.length} servicios');
+    // a) Leer todos los repuestos
+    final todosRepuestos = await repuestoService.getRepuestos();
+    debugPrint('✅ READ todas: ${todosRepuestos.length} repuestos');
 
-    // b) Buscar por código específico
-    final servicioEncontrado = await servicioService.getServicioPorCodigo('TEST-001');
-    if (servicioEncontrado != null) {
-      debugPrint('✅ READ por código: ${servicioEncontrado.codigo} - ${servicioEncontrado.descripcion}');
+    // b) Buscar por modelo y componente exacto
+    final repuestoEncontrado = await repuestoService.getRepuestoExacto(
+        'TEST-MODELO-001',
+        'Componente de Prueba CRUD'
+    );
+    if (repuestoEncontrado != null) {
+      debugPrint('✅ READ exacto: ${repuestoEncontrado.modelo} - ${repuestoEncontrado.componente} - \$${repuestoEncontrado.ultimaCotizacion}');
     } else {
-      debugPrint('❌ No se encontró el servicio insertado');
+      debugPrint('❌ No se encontró el repuesto insertado');
       return;
     }
 
-    // c) Buscar por descripción exacta
-    final servicioPorDescripcion = await servicioService.getServicioPorDescripcion('Servicio de Prueba CRUD');
-    if (servicioPorDescripcion != null) {
-      debugPrint('✅ READ por descripción: ${servicioPorDescripcion.descripcion}');
-    } else {
-      debugPrint('⚠️ No se encontró por descripción exacta');
-    }
-
-    // d) Buscar con búsqueda general
-    final resultadosBusqueda = await servicioService.buscarServicios('Prueba');
+    // c) Buscar con búsqueda general
+    final resultadosBusqueda = await repuestoService.buscarRepuestos('Prueba');
     debugPrint('✅ Búsqueda general: ${resultadosBusqueda.length} resultados');
 
-    // e) Buscar por descripción (contains)
-    final porDescripcionContains = await servicioService.buscarServiciosPorDescripcion('Prueba');
-    debugPrint('✅ Búsqueda por descripción: ${porDescripcionContains.length} resultados');
+    // d) Buscar por modelo
+    final porModelo = await repuestoService.getRepuestosPorModelo('TEST-MODELO');
+    debugPrint('✅ Búsqueda por modelo: ${porModelo.length} resultados');
+
+    // e) Buscar por componente
+    final porComponente = await repuestoService.getRepuestosPorComponente('Componente');
+    debugPrint('✅ Búsqueda por componente: ${porComponente.length} resultados');
 
     // ========== UPDATE ==========
-    debugPrint('5. ✏️ Probando UPDATE (Actualizar servicio)...');
+    debugPrint('5. ✏️ Probando UPDATE (Actualizar repuesto)...');
     try {
       final updateResponse = await supabase.client
-          .from('servicios')
+          .from('repuestos')
           .update({
-        'descripcion': testServicioActualizado.descripcion,
+        'componente': testRepuestoActualizado.componente,
+        'ultimaCotizacion': testRepuestoActualizado.ultimaCotizacion,
       })
-          .eq('codigo', 'TEST-001')
+          .eq('modelo', 'TEST-MODELO-001')
           .select();
 
-      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} servicios actualizados');
+      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} repuestos actualizados');
       debugPrint('   Datos actualizados: ${updateResponse.first}');
 
       // Verificar que se actualizó
-      final servicioActualizado = await servicioService.getServicioPorCodigo('TEST-001');
-      if (servicioActualizado != null && servicioActualizado.descripcion == 'Servicio de Prueba ACTUALIZADO') {
-        debugPrint('✅ Verificación UPDATE: El servicio se actualizó correctamente');
+      final repuestoActualizado = await repuestoService.getRepuestoExacto(
+          'TEST-MODELO-001',
+          'Componente de Prueba ACTUALIZADO'
+      );
+      if (repuestoActualizado != null && repuestoActualizado.ultimaCotizacion == 199.99) {
+        debugPrint('✅ Verificación UPDATE: El repuesto se actualizó correctamente');
       } else {
-        debugPrint('❌ Verificación UPDATE: El servicio no se actualizó');
+        debugPrint('❌ Verificación UPDATE: El repuesto no se actualizó');
       }
 
     } catch (e) {
@@ -140,54 +147,76 @@ Future<void> probarCRUDServicios() async {
     }
 
     // ========== VALIDACIONES DEL SERVICIO ==========
-    debugPrint('6. ✅ Probando validaciones del servicio...');
+    debugPrint('6. ✅ Probando funcionalidades del servicio...');
 
     // a) Validar existencia
-    final existe = await servicioService.existeServicio('TEST-001');
-    debugPrint('   - Existe código TEST-001: $existe');
+    final existe = await repuestoService.existeRepuesto(
+        'TEST-MODELO-001',
+        'Componente de Prueba ACTUALIZADO'
+    );
+    debugPrint('   - Existe repuesto: $existe');
 
-    // b) Validar existencia por descripción
-    final existeDescripcion = await servicioService.existeServicioPorDescripcion('Servicio de Prueba ACTUALIZADO');
-    debugPrint('   - Existe por descripción: $existeDescripcion');
+    // b) Obtener repuestos válidos
+    final repuestosValidos = await repuestoService.getRepuestosValidos();
+    debugPrint('   - Repuestos válidos: ${repuestosValidos.length}');
 
-    // c) Obtener servicios válidos
-    final serviciosValidos = await servicioService.getServiciosValidos();
-    debugPrint('   - Servicios válidos: ${serviciosValidos.length}');
-
-    // d) Formato dropdown
-    final dropdownData = await servicioService.getServiciosParaDropdown();
+    // c) Formato dropdown
+    final dropdownData = await repuestoService.getRepuestosParaDropdown();
     debugPrint('   - Items dropdown: ${dropdownData.length}');
     if (dropdownData.isNotEmpty) {
       debugPrint('   - Ejemplo dropdown: ${dropdownData.first['label']}');
     }
 
-    // e) Sugerencias para autocompletado
-    final sugerenciasDesc = await servicioService.getSugerenciasDescripciones();
-    final sugerenciasCod = await servicioService.getSugerenciasCodigos();
-    debugPrint('   - Sugerencias descripciones: ${sugerenciasDesc.length}');
-    debugPrint('   - Sugerencias códigos: ${sugerenciasCod.length}');
+    // d) Sugerencias para autocompletado
+    final sugerenciasModelos = await repuestoService.getSugerenciasModelos();
+    final sugerenciasComponentes = await repuestoService.getSugerenciasComponentes();
+    debugPrint('   - Sugerencias modelos: ${sugerenciasModelos.length}');
+    debugPrint('   - Sugerencias componentes: ${sugerenciasComponentes.length}');
 
-    // f) Validar formato código
-    final formatoValido = servicioService.validarFormatoCodigo('TEST-001');
-    debugPrint('   - Formato código válido: $formatoValido');
+    // e) Filtrar por rango de precio
+    final porRangoPrecio = await repuestoService.getRepuestosPorRangoPrecio(100.0, 200.0);
+    debugPrint('   - Repuestos en rango \$100-\$200: ${porRangoPrecio.length}');
+
+    // f) Repuestos con precio mayor a
+    final precioMayorA = await repuestoService.getRepuestosPrecioMayorA(50.0);
+    debugPrint('   - Repuestos > \$50: ${precioMayorA.length}');
+
+    // g) Ordenar por precio
+    final ordenadosPrecio = await repuestoService.getRepuestosOrdenadosPorPrecio();
+    debugPrint('   - Ordenados por precio: ${ordenadosPrecio.length}');
+
+    // h) Ordenar por modelo
+    final ordenadosModelo = await repuestoService.getRepuestosOrdenadosPorModelo();
+    debugPrint('   - Ordenados por modelo: ${ordenadosModelo.length}');
+
+    // i) Modelos únicos
+    final modelosUnicos = await repuestoService.getModelosUnicos();
+    debugPrint('   - Modelos únicos: ${modelosUnicos.length}');
+
+    // j) Estadísticas de precios
+    final estadisticas = await repuestoService.getEstadisticasPrecios();
+    debugPrint('   - Estadísticas: promedio \$${estadisticas['promedio']?.toStringAsFixed(2)}');
 
     // ========== DELETE ==========
-    debugPrint('7. 🗑️ Probando DELETE (Eliminar servicio)...');
+    debugPrint('7. 🗑️ Probando DELETE (Eliminar repuesto)...');
     try {
       final deleteResponse = await supabase.client
-          .from('servicios')
+          .from('repuestos')
           .delete()
-          .eq('codigo', 'TEST-001')
+          .eq('modelo', 'TEST-MODELO-001')
           .select();
 
-      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} servicios eliminados');
+      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} repuestos eliminados');
 
       // Verificar que se eliminó
-      final servicioEliminado = await servicioService.getServicioPorCodigo('TEST-001');
-      if (servicioEliminado == null) {
-        debugPrint('✅ Verificación DELETE: El servicio se eliminó correctamente');
+      final repuestoEliminado = await repuestoService.getRepuestoExacto(
+          'TEST-MODELO-001',
+          'Componente de Prueba ACTUALIZADO'
+      );
+      if (repuestoEliminado == null) {
+        debugPrint('✅ Verificación DELETE: El repuesto se eliminó correctamente');
       } else {
-        debugPrint('❌ Verificación DELETE: El servicio NO se eliminó');
+        debugPrint('❌ Verificación DELETE: El repuesto NO se eliminó');
       }
 
     } catch (e) {
@@ -199,38 +228,48 @@ Future<void> probarCRUDServicios() async {
 
     // a) Búsqueda con menos de 2 caracteres
     try {
-      await servicioService.buscarServicios('P');
+      await repuestoService.buscarRepuestos('P');
       debugPrint('❌ ERROR: Debió fallar la búsqueda con 1 carácter');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // b) Obtener con código vacío
+    // b) Rango de precio inválido
     try {
-      await servicioService.getServicioPorCodigo('');
-      debugPrint('❌ ERROR: Debió fallar con código vacío');
+      await repuestoService.getRepuestosPorRangoPrecio(200.0, 100.0);
+      debugPrint('❌ ERROR: Debió fallar con rango inválido');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // c) Obtener con descripción vacía
+    // c) Precio negativo
     try {
-      await servicioService.getServicioPorDescripcion('');
-      debugPrint('❌ ERROR: Debió fallar con descripción vacía');
+      await repuestoService.getRepuestosPrecioMayorA(-50.0);
+      debugPrint('❌ ERROR: Debió fallar con precio negativo');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    debugPrint('🎉 ¡CRUD SERVICIOS COMPLETADO EXITOSAMENTE!');
+    // d) Modelo vacío
+    try {
+      await repuestoService.getRepuestosPorModelo('');
+      debugPrint('❌ ERROR: Debió fallar con modelo vacío');
+    } catch (e) {
+      debugPrint('✅ Manejo de error correcto: $e');
+    }
+
+    debugPrint('🎉 ¡CRUD REPUESTOS COMPLETADO EXITOSAMENTE!');
     debugPrint('📊 Resumen:');
-    debugPrint('   ✅ CREATE - Insertar servicio');
-    debugPrint('   ✅ READ - Leer y buscar servicios');
-    debugPrint('   ✅ UPDATE - Actualizar servicio');
-    debugPrint('   ✅ DELETE - Eliminar servicio');
+    debugPrint('   ✅ CREATE - Insertar repuesto');
+    debugPrint('   ✅ READ - Leer y buscar repuestos');
+    debugPrint('   ✅ UPDATE - Actualizar repuesto');
+    debugPrint('   ✅ DELETE - Eliminar repuesto');
+    debugPrint('   ✅ Filtros por precio y modelo');
+    debugPrint('   ✅ Ordenamientos y estadísticas');
     debugPrint('   ✅ Validaciones y manejo de errores');
 
   } catch (e) {
-    debugPrint('❌ ERROR GENERAL en CRUD Servicios: $e');
+    debugPrint('❌ ERROR GENERAL en CRUD Repuestos: $e');
     debugPrint('🔧 StackTrace: ${e.toString()}');
   }
 }
@@ -247,7 +286,7 @@ void main() async {
     debugPrint('✅ Supabase inicializado correctamente en main');
 
     // ↓ AHORA SÍ EJECUTAR LAS PRUEBAS
-    await probarCRUDServicios();
+    await probarCRUDRepuestos();
 
   } catch (e) {
     debugPrint('❌ ERROR CRÍTICO en inicialización: $e');
