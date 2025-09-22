@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
 import 'backend/schema/structs/empleado.dart';
+import 'backend/schema/structs/obras.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 // ↓ AÑADE ESTAS IMPORTACIONES
 import 'backend/api/supabase_manager.dart';
@@ -15,29 +16,18 @@ import 'package:cupertino_time_picker_hiuzb7/app_state.dart'
 as cupertino_time_picker_hiuzb7_app_state;
 
 // ↓ AÑADE ESTA FUNCIÓN DE PRUEBA
-
-Future<void> probarCRUDEmpleados() async {
-  debugPrint('🧪 Probando CRUD completo de Empleados...');
+Future<void> probarCRUDObras() async {
+  debugPrint('🧪 Probando CRUD completo de Obras...');
 
   // Datos de prueba
-  final testEmpleado = empleado(
-      ci: '1234567',
-      nombre: 'Juan',
-      apellidoPaterno: 'Perez',
-      apellidoMaterno: 'Gomez',
-      rol: 'Operador',
-      password: 'test123',
-      cargo: 'Operador de Maquinaria'
+  final testObra = obras(
+      id: 999, // ID temporal para pruebas
+      nombre: 'Obra de Prueba CRUD'
   );
 
-  final testEmpleadoActualizado = empleado(
-      ci: '1234567',
-      nombre: 'Juan Carlos', // ← Nombre actualizado
-      apellidoPaterno: 'Perez',
-      apellidoMaterno: 'Gomez',
-      rol: 'Supervisor',     // ← Rol actualizado
-      password: 'test123',
-      cargo: 'Supervisor de Obra'
+  final testObraActualizada = obras(
+      id: 999,
+      nombre: 'Obra de Prueba ACTUALIZADA'
   );
 
   try {
@@ -52,93 +42,95 @@ Future<void> probarCRUDEmpleados() async {
     debugPrint('✅ Conexión establecida');
 
     final catalogoRepo = CatalogoRepository(supabase);
-    final empleadoService = CatalogoService(catalogoRepo);
+    final obraService = CatalogoService(catalogoRepo);
 
     // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS
     debugPrint('2. 🧹 Limpiando datos de prueba previos...');
     try {
       await supabase.client
-          .from('empleados')
+          .from('obras')
           .delete()
-          .eq('ci', '1234567');
+          .eq('id', 999);
       debugPrint('✅ Datos previos limpiados');
     } catch (e) {
       debugPrint('⚠️ No se pudieron limpiar datos previos: $e');
     }
 
     // ========== CREATE ==========
-    debugPrint('3. 📝 Probando CREATE (Insertar empleado)...');
+    debugPrint('3. 📝 Probando CREATE (Insertar obra)...');
     try {
       final insertResponse = await supabase.client
-          .from('empleados')
+          .from('obras')
           .insert({
-        'ci': testEmpleado.ci,
-        'nombre': testEmpleado.nombre,
-        'apellidoPaterno': testEmpleado.apellidoPaterno,
-        'apellidoMaterno': testEmpleado.apellidoMaterno,
-        'rol': testEmpleado.rol,
-        'password': testEmpleado.password,
-        'cargo': testEmpleado.cargo
+        'id': testObra.id,
+        'nombre': testObra.nombre,
       })
           .select();
 
-      debugPrint('✅ INSERT exitoso: ${insertResponse.length} empleados insertados');
+      debugPrint('✅ INSERT exitoso: ${insertResponse.length} obras insertadas');
       debugPrint('   Datos insertados: ${insertResponse.first}');
 
     } catch (e) {
       debugPrint('❌ ERROR en INSERT: $e');
       debugPrint('💡 Verifica:');
-      debugPrint('   - Permisos RLS en tabla empleados');
-      debugPrint('   - Estructura de la tabla');
+      debugPrint('   - Permisos RLS en tabla obras');
+      debugPrint('   - Estructura de la tabla (campos id, nombre)');
+      debugPrint('   - Si el ID 999 ya existe');
       return;
     }
 
     // ========== READ ==========
-    debugPrint('4. 📖 Probando READ (Leer empleados)...');
+    debugPrint('4. 📖 Probando READ (Leer obras)...');
 
-    // a) Leer todos los empleados
-    final todosEmpleados = await empleadoService.getEmpleados();
-    debugPrint('✅ READ todos: ${todosEmpleados.length} empleados');
+    // a) Leer todas las obras
+    final todasObras = await obraService.getObras();
+    debugPrint('✅ READ todas: ${todasObras.length} obras');
 
-    // b) Buscar por CI específico
-    final empleadoEncontrado = await empleadoService.getEmpleadoPorCI('1234567');
-    if (empleadoEncontrado != null) {
-      debugPrint('✅ READ por CI: ${empleadoEncontrado.nombre} ${empleadoEncontrado.apellidoPaterno}');
+    // b) Buscar por ID específico
+    final obraEncontrada = await obraService.getObraPorId(999);
+    if (obraEncontrada != null) {
+      debugPrint('✅ READ por ID: ${obraEncontrada.id} - ${obraEncontrada.nombre}');
     } else {
-      debugPrint('❌ No se encontró el empleado insertado');
+      debugPrint('❌ No se encontró la obra insertada');
       return;
     }
 
-    // c) Buscar con búsqueda
-    final resultadosBusqueda = await empleadoService.buscarEmpleados('Juan');
+    // c) Buscar por nombre
+    final obraPorNombre = await obraService.getObraPorNombre('Obra de Prueba CRUD');
+    if (obraPorNombre != null) {
+      debugPrint('✅ READ por nombre: ${obraPorNombre.nombre}');
+    } else {
+      debugPrint('⚠️ No se encontró por nombre exacto');
+    }
+
+    // d) Buscar con búsqueda
+    final resultadosBusqueda = await obraService.buscarObras('Prueba');
     debugPrint('✅ Búsqueda: ${resultadosBusqueda.length} resultados');
 
-    // d) Buscar por nombre completo
-    final porNombreCompleto = await empleadoService.buscarPorNombreCompleto('Juan Perez Gomez');
-    debugPrint('✅ Búsqueda nombre completo: ${porNombreCompleto.length} resultados');
+    // e) Buscar por nombre (contains)
+    final porNombreContains = await obraService.buscarObrasPorNombre('Prueba');
+    debugPrint('✅ Búsqueda por nombre: ${porNombreContains.length} resultados');
 
     // ========== UPDATE ==========
-    debugPrint('5. ✏️ Probando UPDATE (Actualizar empleado)...');
+    debugPrint('5. ✏️ Probando UPDATE (Actualizar obra)...');
     try {
       final updateResponse = await supabase.client
-          .from('empleados')
+          .from('obras')
           .update({
-        'nombre': testEmpleadoActualizado.nombre,
-        'rol': testEmpleadoActualizado.rol,
-        'cargo': testEmpleadoActualizado.cargo
+        'nombre': testObraActualizada.nombre,
       })
-          .eq('ci', '1234567')
+          .eq('id', 999)
           .select();
 
-      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} empleados actualizados');
+      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} obras actualizadas');
       debugPrint('   Datos actualizados: ${updateResponse.first}');
 
       // Verificar que se actualizó
-      final empleadoActualizado = await empleadoService.getEmpleadoPorCI('1234567');
-      if (empleadoActualizado != null && empleadoActualizado.nombre == 'Juan Carlos') {
-        debugPrint('✅ Verificación UPDATE: El empleado se actualizó correctamente');
+      final obraActualizada = await obraService.getObraPorId(999);
+      if (obraActualizada != null && obraActualizada.nombre == 'Obra de Prueba ACTUALIZADA') {
+        debugPrint('✅ Verificación UPDATE: La obra se actualizó correctamente');
       } else {
-        debugPrint('❌ Verificación UPDATE: El empleado no se actualizó');
+        debugPrint('❌ Verificación UPDATE: La obra no se actualizó');
       }
 
     } catch (e) {
@@ -149,42 +141,42 @@ Future<void> probarCRUDEmpleados() async {
     debugPrint('6. ✅ Probando validaciones del servicio...');
 
     // a) Validar existencia
-    final existe = await empleadoService.buscarEmpleados('1234567');
-    debugPrint('   - Existe CI 1234567: $existe');
+    final existe = await obraService.existeObra(999);
+    debugPrint('   - Existe ID 999: $existe');
 
-    // b) Obtener empleados válidos
-    final empleadosValidos = await empleadoService.getEmpleadosValidos();
-    debugPrint('   - Empleados válidos: ${empleadosValidos.length}');
+    // b) Validar existencia por nombre
+    final existeNombre = await obraService.existeObraPorNombre('Obra de Prueba ACTUALIZADA');
+    debugPrint('   - Existe por nombre: $existeNombre');
 
-    // c) Formato dropdown
-    final dropdownData = await empleadoService.getEmpleadosParaDropdown();
+    // d) Formato dropdown
+    final dropdownData = await obraService.getObrasParaDropdown();
     debugPrint('   - Items dropdown: ${dropdownData.length}');
 
-    // d) Sugerencias para autocompletado
-    final sugerencias = await empleadoService.getSugerenciasNombres();
+    // e) Sugerencias para autocompletado
+    final sugerencias = await obraService.getSugerenciasNombresObras();
     debugPrint('   - Sugerencias nombres: ${sugerencias.length}');
 
-    // e) Validar formato CI
-    final formatoValido = empleadoService.validarFormatoCI('1234567');
-    debugPrint('   - Formato CI válido: $formatoValido');
+    // f) Validar formato ID
+    final formatoValido = obraService.validarFormatoId('999');
+    debugPrint('   - Formato ID válido: $formatoValido');
 
     // ========== DELETE ==========
-    debugPrint('7. 🗑️ Probando DELETE (Eliminar empleado)...');
+    debugPrint('7. 🗑️ Probando DELETE (Eliminar obra)...');
     try {
       final deleteResponse = await supabase.client
-          .from('empleados')
+          .from('obras')
           .delete()
-          .eq('ci', '1234567')
+          .eq('id', 999)
           .select();
 
-      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} empleados eliminados');
+      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} obras eliminadas');
 
       // Verificar que se eliminó
-      final empleadoEliminado = await empleadoService.getEmpleadoPorCI('1234567');
-      if (empleadoEliminado == null) {
-        debugPrint('✅ Verificación DELETE: El empleado se eliminó correctamente');
+      final obraEliminada = await obraService.getObraPorId(999);
+      if (obraEliminada == null) {
+        debugPrint('✅ Verificación DELETE: La obra se eliminó correctamente');
       } else {
-        debugPrint('❌ Verificación DELETE: El empleado NO se eliminó');
+        debugPrint('❌ Verificación DELETE: La obra NO se eliminó');
       }
 
     } catch (e) {
@@ -196,34 +188,41 @@ Future<void> probarCRUDEmpleados() async {
 
     // a) Búsqueda con menos de 2 caracteres
     try {
-      await empleadoService.buscarEmpleados('J');
+      await obraService.buscarObras('P');
       debugPrint('❌ ERROR: Debió fallar la búsqueda con 1 carácter');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // b) Obtener con CI vacío
+    // b) Obtener con ID inválido
     try {
-      await empleadoService.getEmpleadoPorCI('');
-      debugPrint('❌ ERROR: Debió fallar con CI vacío');
+      await obraService.getObraPorId(0);
+      debugPrint('❌ ERROR: Debió fallar con ID 0');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    debugPrint('🎉 ¡CRUD EMPLEADOS COMPLETADO EXITOSAMENTE!');
+    // c) Obtener con nombre vacío
+    try {
+      await obraService.getObraPorNombre('');
+      debugPrint('❌ ERROR: Debió fallar con nombre vacío');
+    } catch (e) {
+      debugPrint('✅ Manejo de error correcto: $e');
+    }
+
+    debugPrint('🎉 ¡CRUD OBRAS COMPLETADO EXITOSAMENTE!');
     debugPrint('📊 Resumen:');
-    debugPrint('   ✅ CREATE - Insertar empleado');
-    debugPrint('   ✅ READ - Leer y buscar empleados');
-    debugPrint('   ✅ UPDATE - Actualizar empleado');
-    debugPrint('   ✅ DELETE - Eliminar empleado');
+    debugPrint('   ✅ CREATE - Insertar obra');
+    debugPrint('   ✅ READ - Leer y buscar obras');
+    debugPrint('   ✅ UPDATE - Actualizar obra');
+    debugPrint('   ✅ DELETE - Eliminar obra');
     debugPrint('   ✅ Validaciones y manejo de errores');
 
   } catch (e) {
-    debugPrint('❌ ERROR GENERAL en CRUD Empleados: $e');
+    debugPrint('❌ ERROR GENERAL en CRUD Obras: $e');
     debugPrint('🔧 StackTrace: ${e.toString()}');
   }
 }
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -236,7 +235,7 @@ void main() async {
     debugPrint('✅ Supabase inicializado correctamente en main');
 
     // ↓ AHORA SÍ EJECUTAR LAS PRUEBAS
-    await probarCRUDEmpleados();
+    await probarCRUDObras();
 
   } catch (e) {
     debugPrint('❌ ERROR CRÍTICO en inicialización: $e');

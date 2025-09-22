@@ -1,6 +1,7 @@
 // lib/backend/api/services/catalogo_service.dart
 import 'package:reportes_diarios/backend/schema/structs/empleado.dart';
-
+import 'package:collection/collection.dart';
+import '../../schema/structs/obras.dart';
 import '../repositories/catalogo_repo.dart';
 import '../../schema/structs/descripcion_trabajo.dart';
 
@@ -55,7 +56,6 @@ class CatalogoService {
 
 // ================================== EMPLEADOS =================================
 
-// === EMPLEADOS ===
   Future<List<empleado>> getEmpleados() async {
     return await catalogoRepo.getEmpleados();
   }
@@ -120,7 +120,7 @@ class CatalogoService {
   }
 
   // Obtener sugerencias para autocompletado
-  Future<List<String>> getSugerenciasNombres() async {
+  Future<List<String>> getSugerenciasNombresEmpleados() async {
     final empleados = await catalogoRepo.getEmpleados();
     return empleados.map((emp) => '${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno}').toList();
   }
@@ -159,5 +159,92 @@ class CatalogoService {
 
       return coincide;
     }).toList();
+  }
+
+
+// ================================== EMPLEADOS =================================
+
+  Future<List<obras>> getObras() async {
+    return await catalogoRepo.getObras();
+  }
+
+  Future<List<obras>> buscarObras(String query) async {
+    if (query.isEmpty) {
+      return await getObras(); // Si no hay query, devolver todas
+    }
+    if (query.length < 2) {
+      throw Exception('Ingresa al menos 2 caracteres para buscar');
+    }
+
+    return await catalogoRepo.buscarObras(query);
+  }
+
+  Future<obras?> getObraPorId(int id) async {
+    if (id <= 0) {
+      throw Exception('El ID de la obra debe ser mayor a 0');
+    }
+
+    final todasObras = await catalogoRepo.getObras();
+    return todasObras.firstWhereOrNull((obra) => obra.id == id);
+  }
+
+  Future<obras?> getObraPorNombre(String nombre) async {
+    if (nombre.isEmpty) throw Exception('El nombre no puede estar vacío');
+    final todasObras = await catalogoRepo.getObras();
+    return todasObras.firstWhereOrNull(
+          (obra) => obra.nombre.toLowerCase() == nombre.toLowerCase(),
+    );
+  }
+
+  //Dropdown
+  Future<List<Map<String, dynamic>>> getObrasParaDropdown() async {
+    final obras = await catalogoRepo.getObras();
+
+    return obras.map((obra) => {
+      'value': obra.id,  // ← Usamos el ID como valor
+      'label': obra.nombre,
+      'object': obra, // Objeto completo por si se necesita
+    }).toList();
+  }
+
+  // Buscar obras que contengan texto en el nombre
+  Future<List<obras>> buscarObrasPorNombre(String nombre) async {
+    if (nombre.isEmpty) {
+      return await getObras();
+    }
+
+    if (nombre.length < 2) {
+      throw Exception('Ingresa al menos 2 caracteres para buscar');
+    }
+
+    final todasObras = await catalogoRepo.getObras();
+    return todasObras.where((obra) =>
+        obra.nombre.toLowerCase().contains(nombre.toLowerCase())
+    ).toList();
+  }
+
+  // Validar si una obra existe
+  Future<bool> existeObra(int id) async {
+    final obra = await getObraPorId(id);
+    return obra != null;
+  }
+
+  // Validar si existe obra por nombre
+  Future<bool> existeObraPorNombre(String nombre) async {
+    final obra = await getObraPorNombre(nombre);
+    return obra != null;
+  }
+
+  // Obtener sugerencias para autocompletado
+  Future<List<String>> getSugerenciasNombresObras() async {
+    final obras = await catalogoRepo.getObras();
+    return obras.map((obra) => obra.nombre).toList();
+  }
+
+  // Validar formato de ID
+  bool validarFormatoId(String idStr) {
+    if (idStr.isEmpty) return false;
+    final id = int.tryParse(idStr);
+    return id != null && id > 0;
   }
 }
