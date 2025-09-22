@@ -141,4 +141,38 @@ class CatalogoRepository {
       rethrow;
     }
   }
+
+
+//================================= SERVICIOS =================================
+
+  Future<List<servicios>> getServicios() async {
+    try {
+      final data = await supabase.client
+          .from('servicios')
+          .select('codigo, descripcion')  // ← Solo los campos que necesitas
+          .order('codigo');
+
+      return data.map<servicios>((json) =>
+          servicios.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  Future<List<servicios>> buscarServicios(String query) async {
+    try {
+      final data = await supabase.client
+          .from('servicios')
+          .select('codigo, descripcion')
+          .or('codigo.ilike.%$query%,descripcion.ilike.%$query%')
+          .order('codigo');
+
+      return data.map<servicios>((json) =>
+          servicios.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
 }

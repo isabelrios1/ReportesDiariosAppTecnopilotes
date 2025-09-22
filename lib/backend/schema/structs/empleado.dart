@@ -1,5 +1,3 @@
-// lib/backend/schema/structs/descripcion_trabajo.dart
-
 class empleado {
   final String ci;    // Código identificador (ej: "TRAB-001")
   final String nombre;

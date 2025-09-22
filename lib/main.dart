@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
 import 'backend/schema/structs/empleado.dart';
 import 'backend/schema/structs/obras.dart';
+import 'backend/schema/structs/servicio.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 // ↓ AÑADE ESTAS IMPORTACIONES
 import 'backend/api/supabase_manager.dart';
@@ -16,18 +17,19 @@ import 'package:cupertino_time_picker_hiuzb7/app_state.dart'
 as cupertino_time_picker_hiuzb7_app_state;
 
 // ↓ AÑADE ESTA FUNCIÓN DE PRUEBA
-Future<void> probarCRUDObras() async {
-  debugPrint('🧪 Probando CRUD completo de Obras...');
+
+Future<void> probarCRUDServicios() async {
+  debugPrint('🧪 Probando CRUD completo de Servicios...');
 
   // Datos de prueba
-  final testObra = obras(
-      id: 999, // ID temporal para pruebas
-      nombre: 'Obra de Prueba CRUD'
+  final testServicio = servicios(
+      codigo: 'TEST-001',
+      descripcion: 'Servicio de Prueba CRUD'
   );
 
-  final testObraActualizada = obras(
-      id: 999,
-      nombre: 'Obra de Prueba ACTUALIZADA'
+  final testServicioActualizado = servicios(
+      codigo: 'TEST-001',
+      descripcion: 'Servicio de Prueba ACTUALIZADO'
   );
 
   try {
@@ -42,95 +44,95 @@ Future<void> probarCRUDObras() async {
     debugPrint('✅ Conexión establecida');
 
     final catalogoRepo = CatalogoRepository(supabase);
-    final obraService = CatalogoService(catalogoRepo);
+    final servicioService = CatalogoService(catalogoRepo);
 
     // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS
     debugPrint('2. 🧹 Limpiando datos de prueba previos...');
     try {
       await supabase.client
-          .from('obras')
+          .from('servicios')
           .delete()
-          .eq('id', 999);
+          .eq('codigo', 'TEST-001');
       debugPrint('✅ Datos previos limpiados');
     } catch (e) {
       debugPrint('⚠️ No se pudieron limpiar datos previos: $e');
     }
 
     // ========== CREATE ==========
-    debugPrint('3. 📝 Probando CREATE (Insertar obra)...');
+    debugPrint('3. 📝 Probando CREATE (Insertar servicio)...');
     try {
       final insertResponse = await supabase.client
-          .from('obras')
+          .from('servicios')
           .insert({
-        'id': testObra.id,
-        'nombre': testObra.nombre,
+        'codigo': testServicio.codigo,
+        'descripcion': testServicio.descripcion,
       })
           .select();
 
-      debugPrint('✅ INSERT exitoso: ${insertResponse.length} obras insertadas');
+      debugPrint('✅ INSERT exitoso: ${insertResponse.length} servicios insertados');
       debugPrint('   Datos insertados: ${insertResponse.first}');
 
     } catch (e) {
       debugPrint('❌ ERROR en INSERT: $e');
       debugPrint('💡 Verifica:');
-      debugPrint('   - Permisos RLS en tabla obras');
-      debugPrint('   - Estructura de la tabla (campos id, nombre)');
-      debugPrint('   - Si el ID 999 ya existe');
+      debugPrint('   - Permisos RLS en tabla servicios');
+      debugPrint('   - Estructura de la tabla (campos codigo, descripcion)');
+      debugPrint('   - Si el código TEST-001 ya existe');
       return;
     }
 
     // ========== READ ==========
-    debugPrint('4. 📖 Probando READ (Leer obras)...');
+    debugPrint('4. 📖 Probando READ (Leer servicios)...');
 
-    // a) Leer todas las obras
-    final todasObras = await obraService.getObras();
-    debugPrint('✅ READ todas: ${todasObras.length} obras');
+    // a) Leer todos los servicios
+    final todosServicios = await servicioService.getServicios();
+    debugPrint('✅ READ todas: ${todosServicios.length} servicios');
 
-    // b) Buscar por ID específico
-    final obraEncontrada = await obraService.getObraPorId(999);
-    if (obraEncontrada != null) {
-      debugPrint('✅ READ por ID: ${obraEncontrada.id} - ${obraEncontrada.nombre}');
+    // b) Buscar por código específico
+    final servicioEncontrado = await servicioService.getServicioPorCodigo('TEST-001');
+    if (servicioEncontrado != null) {
+      debugPrint('✅ READ por código: ${servicioEncontrado.codigo} - ${servicioEncontrado.descripcion}');
     } else {
-      debugPrint('❌ No se encontró la obra insertada');
+      debugPrint('❌ No se encontró el servicio insertado');
       return;
     }
 
-    // c) Buscar por nombre
-    final obraPorNombre = await obraService.getObraPorNombre('Obra de Prueba CRUD');
-    if (obraPorNombre != null) {
-      debugPrint('✅ READ por nombre: ${obraPorNombre.nombre}');
+    // c) Buscar por descripción exacta
+    final servicioPorDescripcion = await servicioService.getServicioPorDescripcion('Servicio de Prueba CRUD');
+    if (servicioPorDescripcion != null) {
+      debugPrint('✅ READ por descripción: ${servicioPorDescripcion.descripcion}');
     } else {
-      debugPrint('⚠️ No se encontró por nombre exacto');
+      debugPrint('⚠️ No se encontró por descripción exacta');
     }
 
-    // d) Buscar con búsqueda
-    final resultadosBusqueda = await obraService.buscarObras('Prueba');
-    debugPrint('✅ Búsqueda: ${resultadosBusqueda.length} resultados');
+    // d) Buscar con búsqueda general
+    final resultadosBusqueda = await servicioService.buscarServicios('Prueba');
+    debugPrint('✅ Búsqueda general: ${resultadosBusqueda.length} resultados');
 
-    // e) Buscar por nombre (contains)
-    final porNombreContains = await obraService.buscarObrasPorNombre('Prueba');
-    debugPrint('✅ Búsqueda por nombre: ${porNombreContains.length} resultados');
+    // e) Buscar por descripción (contains)
+    final porDescripcionContains = await servicioService.buscarServiciosPorDescripcion('Prueba');
+    debugPrint('✅ Búsqueda por descripción: ${porDescripcionContains.length} resultados');
 
     // ========== UPDATE ==========
-    debugPrint('5. ✏️ Probando UPDATE (Actualizar obra)...');
+    debugPrint('5. ✏️ Probando UPDATE (Actualizar servicio)...');
     try {
       final updateResponse = await supabase.client
-          .from('obras')
+          .from('servicios')
           .update({
-        'nombre': testObraActualizada.nombre,
+        'descripcion': testServicioActualizado.descripcion,
       })
-          .eq('id', 999)
+          .eq('codigo', 'TEST-001')
           .select();
 
-      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} obras actualizadas');
+      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} servicios actualizados');
       debugPrint('   Datos actualizados: ${updateResponse.first}');
 
       // Verificar que se actualizó
-      final obraActualizada = await obraService.getObraPorId(999);
-      if (obraActualizada != null && obraActualizada.nombre == 'Obra de Prueba ACTUALIZADA') {
-        debugPrint('✅ Verificación UPDATE: La obra se actualizó correctamente');
+      final servicioActualizado = await servicioService.getServicioPorCodigo('TEST-001');
+      if (servicioActualizado != null && servicioActualizado.descripcion == 'Servicio de Prueba ACTUALIZADO') {
+        debugPrint('✅ Verificación UPDATE: El servicio se actualizó correctamente');
       } else {
-        debugPrint('❌ Verificación UPDATE: La obra no se actualizó');
+        debugPrint('❌ Verificación UPDATE: El servicio no se actualizó');
       }
 
     } catch (e) {
@@ -141,42 +143,51 @@ Future<void> probarCRUDObras() async {
     debugPrint('6. ✅ Probando validaciones del servicio...');
 
     // a) Validar existencia
-    final existe = await obraService.existeObra(999);
-    debugPrint('   - Existe ID 999: $existe');
+    final existe = await servicioService.existeServicio('TEST-001');
+    debugPrint('   - Existe código TEST-001: $existe');
 
-    // b) Validar existencia por nombre
-    final existeNombre = await obraService.existeObraPorNombre('Obra de Prueba ACTUALIZADA');
-    debugPrint('   - Existe por nombre: $existeNombre');
+    // b) Validar existencia por descripción
+    final existeDescripcion = await servicioService.existeServicioPorDescripcion('Servicio de Prueba ACTUALIZADO');
+    debugPrint('   - Existe por descripción: $existeDescripcion');
+
+    // c) Obtener servicios válidos
+    final serviciosValidos = await servicioService.getServiciosValidos();
+    debugPrint('   - Servicios válidos: ${serviciosValidos.length}');
 
     // d) Formato dropdown
-    final dropdownData = await obraService.getObrasParaDropdown();
+    final dropdownData = await servicioService.getServiciosParaDropdown();
     debugPrint('   - Items dropdown: ${dropdownData.length}');
+    if (dropdownData.isNotEmpty) {
+      debugPrint('   - Ejemplo dropdown: ${dropdownData.first['label']}');
+    }
 
     // e) Sugerencias para autocompletado
-    final sugerencias = await obraService.getSugerenciasNombresObras();
-    debugPrint('   - Sugerencias nombres: ${sugerencias.length}');
+    final sugerenciasDesc = await servicioService.getSugerenciasDescripciones();
+    final sugerenciasCod = await servicioService.getSugerenciasCodigos();
+    debugPrint('   - Sugerencias descripciones: ${sugerenciasDesc.length}');
+    debugPrint('   - Sugerencias códigos: ${sugerenciasCod.length}');
 
-    // f) Validar formato ID
-    final formatoValido = obraService.validarFormatoId('999');
-    debugPrint('   - Formato ID válido: $formatoValido');
+    // f) Validar formato código
+    final formatoValido = servicioService.validarFormatoCodigo('TEST-001');
+    debugPrint('   - Formato código válido: $formatoValido');
 
     // ========== DELETE ==========
-    debugPrint('7. 🗑️ Probando DELETE (Eliminar obra)...');
+    debugPrint('7. 🗑️ Probando DELETE (Eliminar servicio)...');
     try {
       final deleteResponse = await supabase.client
-          .from('obras')
+          .from('servicios')
           .delete()
-          .eq('id', 999)
+          .eq('codigo', 'TEST-001')
           .select();
 
-      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} obras eliminadas');
+      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} servicios eliminados');
 
       // Verificar que se eliminó
-      final obraEliminada = await obraService.getObraPorId(999);
-      if (obraEliminada == null) {
-        debugPrint('✅ Verificación DELETE: La obra se eliminó correctamente');
+      final servicioEliminado = await servicioService.getServicioPorCodigo('TEST-001');
+      if (servicioEliminado == null) {
+        debugPrint('✅ Verificación DELETE: El servicio se eliminó correctamente');
       } else {
-        debugPrint('❌ Verificación DELETE: La obra NO se eliminó');
+        debugPrint('❌ Verificación DELETE: El servicio NO se eliminó');
       }
 
     } catch (e) {
@@ -188,41 +199,42 @@ Future<void> probarCRUDObras() async {
 
     // a) Búsqueda con menos de 2 caracteres
     try {
-      await obraService.buscarObras('P');
+      await servicioService.buscarServicios('P');
       debugPrint('❌ ERROR: Debió fallar la búsqueda con 1 carácter');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // b) Obtener con ID inválido
+    // b) Obtener con código vacío
     try {
-      await obraService.getObraPorId(0);
-      debugPrint('❌ ERROR: Debió fallar con ID 0');
+      await servicioService.getServicioPorCodigo('');
+      debugPrint('❌ ERROR: Debió fallar con código vacío');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // c) Obtener con nombre vacío
+    // c) Obtener con descripción vacía
     try {
-      await obraService.getObraPorNombre('');
-      debugPrint('❌ ERROR: Debió fallar con nombre vacío');
+      await servicioService.getServicioPorDescripcion('');
+      debugPrint('❌ ERROR: Debió fallar con descripción vacía');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    debugPrint('🎉 ¡CRUD OBRAS COMPLETADO EXITOSAMENTE!');
+    debugPrint('🎉 ¡CRUD SERVICIOS COMPLETADO EXITOSAMENTE!');
     debugPrint('📊 Resumen:');
-    debugPrint('   ✅ CREATE - Insertar obra');
-    debugPrint('   ✅ READ - Leer y buscar obras');
-    debugPrint('   ✅ UPDATE - Actualizar obra');
-    debugPrint('   ✅ DELETE - Eliminar obra');
+    debugPrint('   ✅ CREATE - Insertar servicio');
+    debugPrint('   ✅ READ - Leer y buscar servicios');
+    debugPrint('   ✅ UPDATE - Actualizar servicio');
+    debugPrint('   ✅ DELETE - Eliminar servicio');
     debugPrint('   ✅ Validaciones y manejo de errores');
 
   } catch (e) {
-    debugPrint('❌ ERROR GENERAL en CRUD Obras: $e');
+    debugPrint('❌ ERROR GENERAL en CRUD Servicios: $e');
     debugPrint('🔧 StackTrace: ${e.toString()}');
   }
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -235,7 +247,7 @@ void main() async {
     debugPrint('✅ Supabase inicializado correctamente en main');
 
     // ↓ AHORA SÍ EJECUTAR LAS PRUEBAS
-    await probarCRUDObras();
+    await probarCRUDServicios();
 
   } catch (e) {
     debugPrint('❌ ERROR CRÍTICO en inicialización: $e');

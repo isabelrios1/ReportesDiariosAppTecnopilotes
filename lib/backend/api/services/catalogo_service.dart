@@ -2,6 +2,7 @@
 import 'package:reportes_diarios/backend/schema/structs/empleado.dart';
 import 'package:collection/collection.dart';
 import '../../schema/structs/obras.dart';
+import '../../schema/structs/servicio.dart';
 import '../repositories/catalogo_repo.dart';
 import '../../schema/structs/descripcion_trabajo.dart';
 
@@ -247,4 +248,107 @@ class CatalogoService {
     final id = int.tryParse(idStr);
     return id != null && id > 0;
   }
+
+
+// ================================== SERVICIOS =================================
+  Future<List<servicios>> getServicios() async {
+    return await catalogoRepo.getServicios();
+  }
+
+  Future<List<servicios>> buscarServicios(String query) async {
+    if (query.isEmpty) {
+      return await getServicios(); // Si no hay query, devolver todos
+    }
+
+    if (query.length < 2) {
+      throw Exception('Ingresa al menos 2 caracteres para buscar');
+    }
+
+    return await catalogoRepo.buscarServicios(query);
+  }
+
+  Future<servicios?> getServicioPorCodigo(String codigo) async {
+    if (codigo.isEmpty) {
+      throw Exception('El código no puede estar vacío');
+    }
+
+    final todosServicios = await catalogoRepo.getServicios();
+    return todosServicios.firstWhereOrNull((obra) => obra.codigo == codigo);
+  }
+
+  Future<servicios?> getServicioPorDescripcion(String descripcion) async {
+    if (descripcion.isEmpty) {
+      throw Exception('La descripción no puede estar vacía');
+    }
+
+    final todosServicios = await catalogoRepo.getServicios();
+    return todosServicios.firstWhereOrNull(
+          (obra) => obra.descripcion.toLowerCase() == descripcion.toLowerCase(),
+    );
+  }
+
+  // Para dropdowns en UI - formato optimizado
+  Future<List<Map<String, dynamic>>> getServiciosParaDropdown() async {
+    final servicios = await catalogoRepo.getServicios();
+
+    return servicios.map((serv) => {
+      'value': serv.codigo,  // ← Usamos el código como valor
+      'label': '${serv.codigo} - ${serv.descripcion}',
+      'object': serv, // Objeto completo por si se necesita
+    }).toList();
+  }
+
+  // Buscar servicios que contengan texto en la descripción
+  Future<List<servicios>> buscarServiciosPorDescripcion(String descripcion) async {
+    if (descripcion.isEmpty) {
+      return await getServicios();
+    }
+
+    if (descripcion.length < 2) {
+      throw Exception('Ingresa al menos 2 caracteres para buscar');
+    }
+
+    final todosServicios = await catalogoRepo.getServicios();
+    return todosServicios.where((serv) =>
+        serv.descripcion.toLowerCase().contains(descripcion.toLowerCase())
+    ).toList();
+  }
+
+  // Validar si un servicio existe
+  Future<bool> existeServicio(String codigo) async {
+    final servicio = await getServicioPorCodigo(codigo);
+    return servicio != null;
+  }
+
+  // Validar si existe servicio por descripción exacta
+  Future<bool> existeServicioPorDescripcion(String descripcion) async {
+    final servicio = await getServicioPorDescripcion(descripcion);
+    return servicio != null;
+  }
+
+  // Filtrar servicios válidos (con datos completos)
+  Future<List<servicios>> getServiciosValidos() async {
+    final todos = await catalogoRepo.getServicios();
+    return todos.where((serv) => serv.esValido).toList();
+  }
+
+  // Obtener sugerencias para autocompletado
+  Future<List<String>> getSugerenciasDescripciones() async {
+    final servicios = await catalogoRepo.getServicios();
+    return servicios.map((serv) => serv.descripcion).toList();
+  }
+
+  // Obtener sugerencias de códigos
+  Future<List<String>> getSugerenciasCodigos() async {
+    final servicios = await catalogoRepo.getServicios();
+    return servicios.map((serv) => serv.codigo).toList();
+  }
+
+  // Validar formato de código (opcional)
+  bool validarFormatoCodigo(String codigo) {
+    if (codigo.isEmpty) return false;
+    // Puedes agregar validaciones específicas según tu formato
+    return codigo.length >= 1; // Mínimo 1 carácter
+  }
+
 }
