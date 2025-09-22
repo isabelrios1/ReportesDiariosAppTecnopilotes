@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
+import 'backend/schema/structs/empleado.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 // ↓ AÑADE ESTAS IMPORTACIONES
 import 'backend/api/supabase_manager.dart';
@@ -15,68 +16,28 @@ as cupertino_time_picker_hiuzb7_app_state;
 
 // ↓ AÑADE ESTA FUNCIÓN DE PRUEBA
 
-
-Future<void> probarDescripcionesTrabajo() async {
-  debugPrint('🧪 Probando CRUD con autenticación...');
-
-  try {
-    // ✅ INICIALIZAR SUPABASE
-    if (!SupabaseService.isInitialized) {
-      await SupabaseService.initialize();
-    }
-
-    final supabase = SupabaseManager();
-    await supabase.ensureConnected();
-
-    // ✅ VERIFICAR SI YA ESTÁS AUTENTICADO
-    final currentUser = supabase.client.auth.currentUser;
-    if (currentUser == null) {
-      debugPrint('🔐 No autenticado. Iniciando sesión...');
-
-      // INICIAR SESIÓN CON UN USUARIO VÁLIDO
-      final authResponse = await supabase.client.auth.signInWithPassword(
-        email: 'mvillarroel.deheza@gmail.com',  // ← REEMPLAZA CON UN USUARIO REAL
-        password: '1911tobyrufo',       // ← REEMPLAZA CON PASSWORD REAL
-      );
-
-      if (authResponse.user == null) {
-        debugPrint('❌ Error de autenticación. Creando usuario de prueba...');
-        // Intentar crear usuario si no existe
-        try {
-          final signUpResponse = await supabase.client.auth.signUp(
-            email: 'test@ejemplo.com',
-            password: 'testpassword123',
-          );
-          debugPrint('✅ Usuario de prueba creado');
-        } catch (e) {
-          debugPrint('❌ No se pudo crear usuario: $e');
-        }
-      } else {
-        debugPrint('✅ Sesión iniciada: ${authResponse.user!.email}');
-      }
-    } else {
-      debugPrint('✅ Ya autenticado: ${currentUser.email}');
-    }
-
-    await probarCRUDDescripcionesTrabajo();
-
-  } catch (e) {
-    debugPrint('❌ ERROR: $e');
-  }
-}
-
-Future<void> probarCRUDDescripcionesTrabajo() async {
-  debugPrint('🧪 Probando CRUD completo de Descripciones de Trabajo...');
+Future<void> probarCRUDEmpleados() async {
+  debugPrint('🧪 Probando CRUD completo de Empleados...');
 
   // Datos de prueba
-  final testDescripcion = DescripcionTrabajo(
-      codigo: 'TEST-001',
-      detalle: 'Descripción de prueba para CRUD'
+  final testEmpleado = empleado(
+      ci: '1234567',
+      nombre: 'Juan',
+      apellidoPaterno: 'Perez',
+      apellidoMaterno: 'Gomez',
+      rol: 'Operador',
+      password: 'test123',
+      cargo: 'Operador de Maquinaria'
   );
 
-  final testDescripcionActualizada = DescripcionTrabajo(
-      codigo: 'TEST-001',
-      detalle: 'Descripción ACTUALIZADA para CRUD'
+  final testEmpleadoActualizado = empleado(
+      ci: '1234567',
+      nombre: 'Juan Carlos', // ← Nombre actualizado
+      apellidoPaterno: 'Perez',
+      apellidoMaterno: 'Gomez',
+      rol: 'Supervisor',     // ← Rol actualizado
+      password: 'test123',
+      cargo: 'Supervisor de Obra'
   );
 
   try {
@@ -91,83 +52,93 @@ Future<void> probarCRUDDescripcionesTrabajo() async {
     debugPrint('✅ Conexión establecida');
 
     final catalogoRepo = CatalogoRepository(supabase);
-    final catalogoService = CatalogoService(catalogoRepo);
+    final empleadoService = CatalogoService(catalogoRepo);
 
-    // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS (por si acaso)
+    // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS
     debugPrint('2. 🧹 Limpiando datos de prueba previos...');
     try {
       await supabase.client
-          .from('descripcionTrabajo')
+          .from('empleados')
           .delete()
-          .eq('codigo', 'TEST-001');
+          .eq('ci', '1234567');
       debugPrint('✅ Datos previos limpiados');
     } catch (e) {
       debugPrint('⚠️ No se pudieron limpiar datos previos: $e');
     }
 
     // ========== CREATE ==========
-    debugPrint('3. 📝 Probando CREATE (Insertar)...');
+    debugPrint('3. 📝 Probando CREATE (Insertar empleado)...');
     try {
-      // Insertar usando Supabase directamente
       final insertResponse = await supabase.client
-          .from('descripcionTrabajo')
+          .from('empleados')
           .insert({
-        'codigo': testDescripcion.codigo,
-        'detalle': testDescripcion.detalle
+        'ci': testEmpleado.ci,
+        'nombre': testEmpleado.nombre,
+        'apellidoPaterno': testEmpleado.apellidoPaterno,
+        'apellidoMaterno': testEmpleado.apellidoMaterno,
+        'rol': testEmpleado.rol,
+        'password': testEmpleado.password,
+        'cargo': testEmpleado.cargo
       })
           .select();
 
-      debugPrint('✅ INSERT exitoso: ${insertResponse.length} registros insertados');
+      debugPrint('✅ INSERT exitoso: ${insertResponse.length} empleados insertados');
       debugPrint('   Datos insertados: ${insertResponse.first}');
 
     } catch (e) {
       debugPrint('❌ ERROR en INSERT: $e');
       debugPrint('💡 Verifica:');
-      debugPrint('   - Permisos de escritura en la tabla');
-      debugPrint('   - Estructura de la tabla (campos codigo, detalle)');
+      debugPrint('   - Permisos RLS en tabla empleados');
+      debugPrint('   - Estructura de la tabla');
       return;
     }
 
     // ========== READ ==========
-    debugPrint('4. 📖 Probando READ (Leer)...');
+    debugPrint('4. 📖 Probando READ (Leer empleados)...');
 
-    // a) Leer todas las descripciones
-    final todasDescripciones = await catalogoService.getDescripcionesTrabajo();
-    debugPrint('✅ READ todas: ${todasDescripciones.length} descripciones');
+    // a) Leer todos los empleados
+    final todosEmpleados = await empleadoService.getEmpleados();
+    debugPrint('✅ READ todos: ${todosEmpleados.length} empleados');
 
-    // b) Buscar por código específico
-    final descripcionEncontrada = await catalogoService.getDescripcionTrabajoPorCodigo('TEST-001');
-    if (descripcionEncontrada != null) {
-      debugPrint('✅ READ por código: ${descripcionEncontrada.codigo} - ${descripcionEncontrada.detalle}');
+    // b) Buscar por CI específico
+    final empleadoEncontrado = await empleadoService.getEmpleadoPorCI('1234567');
+    if (empleadoEncontrado != null) {
+      debugPrint('✅ READ por CI: ${empleadoEncontrado.nombre} ${empleadoEncontrado.apellidoPaterno}');
     } else {
-      debugPrint('❌ No se encontró la descripción insertada');
+      debugPrint('❌ No se encontró el empleado insertado');
       return;
     }
 
     // c) Buscar con búsqueda
-    final resultadosBusqueda = await catalogoService.buscarDescripcionesTrabajo('TEST');
+    final resultadosBusqueda = await empleadoService.buscarEmpleados('Juan');
     debugPrint('✅ Búsqueda: ${resultadosBusqueda.length} resultados');
 
+    // d) Buscar por nombre completo
+    final porNombreCompleto = await empleadoService.buscarPorNombreCompleto('Juan Perez Gomez');
+    debugPrint('✅ Búsqueda nombre completo: ${porNombreCompleto.length} resultados');
+
     // ========== UPDATE ==========
-    debugPrint('5. ✏️ Probando UPDATE (Actualizar)...');
+    debugPrint('5. ✏️ Probando UPDATE (Actualizar empleado)...');
     try {
       final updateResponse = await supabase.client
-          .from('descripcionTrabajo')
+          .from('empleados')
           .update({
-        'detalle': testDescripcionActualizada.detalle
+        'nombre': testEmpleadoActualizado.nombre,
+        'rol': testEmpleadoActualizado.rol,
+        'cargo': testEmpleadoActualizado.cargo
       })
-          .eq('codigo', 'TEST-001')
+          .eq('ci', '1234567')
           .select();
 
-      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} registros actualizados');
+      debugPrint('✅ UPDATE exitoso: ${updateResponse.length} empleados actualizados');
       debugPrint('   Datos actualizados: ${updateResponse.first}');
 
       // Verificar que se actualizó
-      final descripcionActualizada = await catalogoService.getDescripcionTrabajoPorCodigo('TEST-001');
-      if (descripcionActualizada != null && descripcionActualizada.detalle == testDescripcionActualizada.detalle) {
-        debugPrint('✅ Verificación UPDATE: La descripción se actualizó correctamente');
+      final empleadoActualizado = await empleadoService.getEmpleadoPorCI('1234567');
+      if (empleadoActualizado != null && empleadoActualizado.nombre == 'Juan Carlos') {
+        debugPrint('✅ Verificación UPDATE: El empleado se actualizó correctamente');
       } else {
-        debugPrint('❌ Verificación UPDATE: La descripción no se actualizó');
+        debugPrint('❌ Verificación UPDATE: El empleado no se actualizó');
       }
 
     } catch (e) {
@@ -178,34 +149,42 @@ Future<void> probarCRUDDescripcionesTrabajo() async {
     debugPrint('6. ✅ Probando validaciones del servicio...');
 
     // a) Validar existencia
-    final existe = await catalogoService.existeDescripcionTrabajo('TEST-001');
-    debugPrint('   - Existe TEST-001: $existe');
+    final existe = await empleadoService.buscarEmpleados('1234567');
+    debugPrint('   - Existe CI 1234567: $existe');
 
-    // b) Obtener descripciones válidas
-    final descripcionesValidas = await catalogoService.getDescripcionesValidas();
-    debugPrint('   - Descripciones válidas: ${descripcionesValidas.length}');
+    // b) Obtener empleados válidos
+    final empleadosValidos = await empleadoService.getEmpleadosValidos();
+    debugPrint('   - Empleados válidos: ${empleadosValidos.length}');
 
     // c) Formato dropdown
-    final dropdownData = await catalogoService.getDescripcionesTrabajoParaDropdown();
+    final dropdownData = await empleadoService.getEmpleadosParaDropdown();
     debugPrint('   - Items dropdown: ${dropdownData.length}');
 
+    // d) Sugerencias para autocompletado
+    final sugerencias = await empleadoService.getSugerenciasNombres();
+    debugPrint('   - Sugerencias nombres: ${sugerencias.length}');
+
+    // e) Validar formato CI
+    final formatoValido = empleadoService.validarFormatoCI('1234567');
+    debugPrint('   - Formato CI válido: $formatoValido');
+
     // ========== DELETE ==========
-    debugPrint('7. 🗑️ Probando DELETE (Eliminar)...');
+    debugPrint('7. 🗑️ Probando DELETE (Eliminar empleado)...');
     try {
       final deleteResponse = await supabase.client
-          .from('descripcionTrabajo')
+          .from('empleados')
           .delete()
-          .eq('codigo', 'TEST-001')
+          .eq('ci', '1234567')
           .select();
 
-      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} registros eliminados');
+      debugPrint('✅ DELETE exitoso: ${deleteResponse.length} empleados eliminados');
 
       // Verificar que se eliminó
-      final descripcionEliminada = await catalogoService.getDescripcionTrabajoPorCodigo('TEST-001');
-      if (descripcionEliminada == null) {
-        debugPrint('✅ Verificación DELETE: La descripción se eliminó correctamente');
+      final empleadoEliminado = await empleadoService.getEmpleadoPorCI('1234567');
+      if (empleadoEliminado == null) {
+        debugPrint('✅ Verificación DELETE: El empleado se eliminó correctamente');
       } else {
-        debugPrint('❌ Verificación DELETE: La descripción NO se eliminó');
+        debugPrint('❌ Verificación DELETE: El empleado NO se eliminó');
       }
 
     } catch (e) {
@@ -217,30 +196,30 @@ Future<void> probarCRUDDescripcionesTrabajo() async {
 
     // a) Búsqueda con menos de 2 caracteres
     try {
-      await catalogoService.buscarDescripcionesTrabajo('A');
+      await empleadoService.buscarEmpleados('J');
       debugPrint('❌ ERROR: Debió fallar la búsqueda con 1 carácter');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    // b) Obtener con código vacío
+    // b) Obtener con CI vacío
     try {
-      await catalogoService.getDescripcionTrabajoPorCodigo('');
-      debugPrint('❌ ERROR: Debió fallar con código vacío');
+      await empleadoService.getEmpleadoPorCI('');
+      debugPrint('❌ ERROR: Debió fallar con CI vacío');
     } catch (e) {
       debugPrint('✅ Manejo de error correcto: $e');
     }
 
-    debugPrint('🎉 ¡CRUD COMPLETADO EXITOSAMENTE!');
+    debugPrint('🎉 ¡CRUD EMPLEADOS COMPLETADO EXITOSAMENTE!');
     debugPrint('📊 Resumen:');
-    debugPrint('   ✅ CREATE - Insertar datos');
-    debugPrint('   ✅ READ - Leer y buscar datos');
-    debugPrint('   ✅ UPDATE - Actualizar datos');
-    debugPrint('   ✅ DELETE - Eliminar datos');
+    debugPrint('   ✅ CREATE - Insertar empleado');
+    debugPrint('   ✅ READ - Leer y buscar empleados');
+    debugPrint('   ✅ UPDATE - Actualizar empleado');
+    debugPrint('   ✅ DELETE - Eliminar empleado');
     debugPrint('   ✅ Validaciones y manejo de errores');
 
   } catch (e) {
-    debugPrint('❌ ERROR GENERAL en CRUD: $e');
+    debugPrint('❌ ERROR GENERAL en CRUD Empleados: $e');
     debugPrint('🔧 StackTrace: ${e.toString()}');
   }
 }
@@ -257,7 +236,7 @@ void main() async {
     debugPrint('✅ Supabase inicializado correctamente en main');
 
     // ↓ AHORA SÍ EJECUTAR LAS PRUEBAS
-    await probarDescripcionesTrabajo();
+    await probarCRUDEmpleados();
 
   } catch (e) {
     debugPrint('❌ ERROR CRÍTICO en inicialización: $e');
