@@ -1,12 +1,11 @@
 class empleado {
-  final String ci;    // Código identificador (ej: "TRAB-001")
+  final String ci;
   final String nombre;
   final String apellidoPaterno;
   final String apellidoMaterno;
   final String rol;
   final String password;
   final String cargo;
-  // Descripción detallada del trabajo
 
   empleado({
     required this.ci,

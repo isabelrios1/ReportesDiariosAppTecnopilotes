@@ -1,5 +1,6 @@
 import 'package:reportes_diarios/backend/schema/structs/catalogo/empleado.dart';
 import 'package:collection/collection.dart';
+import '../../schema/structs/catalogo/maquina.dart';
 import '../../schema/structs/catalogo/obras.dart';
 import '../../schema/structs/catalogo/repuestos.dart';
 import '../../schema/structs/catalogo/servicio.dart';
@@ -532,4 +533,97 @@ class CatalogoService {
 
     return modelosUnicos.values.toList();
   }
+
+// ================================= MAQUINAS =================================
+  Future<List<Maquina>> getMaquinas() => catalogoRepo.getMaquinas();
+  Future<List<Maquina>> getMaquinasActivas() => catalogoRepo.getMaquinasActivas();
+  Future<List<Maquina>> getMaquinasOperativas() async {
+    final todas = await catalogoRepo.getMaquinas();
+    return todas.where((m) => m.estaOperativa).toList();
+  }
+
+  Future<List<Maquina>> buscarMaquinas(String query) {
+    if (query.length < 2) throw Exception('Búsqueda requiere al menos 2 caracteres');
+    return catalogoRepo.buscarMaquinas(query);
+  }
+
+  Future<Maquina?> getMaquinaPorCodigo(String codigo) {
+    if (codigo.isEmpty) throw Exception('Código no puede estar vacío');
+    return catalogoRepo.getMaquinaPorCodigo(codigo);
+  }
+
+  // --- DROPDOWNS ---
+// CORRECTO - Función síncrona normal
+  List<Map<String, dynamic>> _maquinasToDropdown(List<Maquina> maquinas) =>
+      maquinas.map((m) => {
+        'value': m.codigo,
+        'label': '${m.codigo} - ${m.nombre}',
+        'object': m,
+      }).toList();
+
+  Future<List<Map<String, dynamic>>> getMaquinasParaDropdown() async {
+    final maquinas = await catalogoRepo.getMaquinasActivas();
+    return _maquinasToDropdown(maquinas);
+  }
+
+  Future<List<Map<String, dynamic>>> getMaquinasOperativasParaDropdown() async {
+    final maquinas = await getMaquinasOperativas();
+    return _maquinasToDropdown(maquinas);
+  }
+
+  // --- ACTUALIZACIONES CON VALIDACIÓN ---
+  Future<Maquina> _validarMaquina(String codigo) async {
+    final maquina = await getMaquinaPorCodigo(codigo);
+    if (maquina == null) throw Exception('Máquina no encontrada');
+    return maquina;
+  }
+
+  Future<void> actualizarKilometraje(String codigo, double nuevoKm) async {
+    if (nuevoKm < 0) throw Exception('Kilometraje no puede ser negativo');
+
+    final maquina = await _validarMaquina(codigo);
+    if (nuevoKm < maquina.kilometraje) throw Exception('Kilometraje no puede ser menor al actual');
+
+    await catalogoRepo.actualizarKilometraje(codigo, nuevoKm);
+  }
+
+  Future<void> actualizarHorometro(String codigo, double nuevoHorometro) async {
+    if (nuevoHorometro < 0) throw Exception('Horómetro no puede ser negativo');
+
+    final maquina = await _validarMaquina(codigo);
+    if (nuevoHorometro < maquina.horometro) throw Exception('Horómetro no puede ser menor al actual');
+
+    await catalogoRepo.actualizarHorometro(codigo, nuevoHorometro);
+  }
+
+  Future<void> actualizarEstado(String codigo, String nuevoEstado) {
+    const estadosValidos = {'operativa', 'mantenimiento', 'reparación', 'inactiva'};
+    if (!estadosValidos.contains(nuevoEstado.toLowerCase())) {
+      throw Exception('Estado no válido. Use: ${estadosValidos.join(", ")}');
+    }
+    return catalogoRepo.actualizarEstado(codigo, nuevoEstado);
+  }
+
+  Future<void> actualizarObraActual(String codigo, int? obraId) {
+    if (obraId != null && obraId <= 0) throw Exception('ID de obra no válido');
+    return catalogoRepo.actualizarObraActual(codigo, obraId);
+  }
+
+  Future<void> asignarMaquinaAObra(String codigo, obras? obra) =>
+      actualizarObraActual(codigo, obra?.id);
+
+  // --- VALIDACIONES DE NEGOCIO ---
+  Future<bool> puedeRealizarReporte(String codigo) async {
+    final maquina = await getMaquinaPorCodigo(codigo);
+    return maquina != null && maquina.estaOperativa && maquina.tieneObraAsignada;
+  }
+
+  Future<double> getCostoPorHora(String codigo) async {
+    final maquina = await _validarMaquina(codigo);
+    return maquina.costoPorHora;
+  }
+
+  // --- VERIFICACIONES ---
+  Future<bool> existeMaquina(String codigo) => catalogoRepo.existeMaquina(codigo);
+  Future<bool> maquinaEstaOperativa(String codigo) => catalogoRepo.maquinaEstaOperativa(codigo);
 }

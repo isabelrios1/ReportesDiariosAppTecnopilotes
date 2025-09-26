@@ -226,4 +226,141 @@ class CatalogoRepository {
       rethrow;
     }
   }
+//================================= MAQUINAS =================================
+  Future<List<Maquina>> getMaquinas() => _fetchMaquinas();
+  Future<List<Maquina>> getMaquinasActivas() => _fetchMaquinas(estado: 'operativa');
+  Future<List<Maquina>> getMaquinasPorTipo(String tipo) => _fetchMaquinas(tipo: tipo);
+  Future<List<Maquina>> getMaquinasPorEstado(String estado) => _fetchMaquinas(estado: estado);
+
+  Future<List<Maquina>> _fetchMaquinas({String? tipo, String? estado}) async {
+    try {
+      var query = supabase.client.from('maquinaria').select('*');
+
+      if (tipo != null) query = query.eq('tipo', tipo);
+      if (estado != null) query = query.eq('estado', estado);
+
+      final data = await query.order('nombre');
+      return data.map<Maquina>((json) => Maquina.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  // --- CONSULTAS ESPECÍFICAS ---
+  Future<List<Maquina>> getMaquinasEnObra(String obraId) async {
+    try {
+      final data = await supabase.client
+          .from('maquinaria')
+          .select('*')
+          .eq('obraActual', obraId) // ← Corregido: sin ->>
+          .order('nombre');
+
+      return data.map<Maquina>((json) => Maquina.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  Future<List<Maquina>> getMaquinasConObra() async {
+    try {
+      final data = await supabase.client
+          .from('maquinaria') // ← Corregido: era 'maquinas'
+          .select('*, obras:obraActual(id, nombre)')
+          .order('nombre');
+
+      return data.map<Maquina>((json) {
+        final maquina = Maquina.fromJson(json);
+        if (json['obras'] != null) {
+          maquina.cargarObraCompleta(obras.fromJson(json['obras']));
+        }
+        return maquina;
+      }).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  Future<Maquina?> getMaquinaPorCodigo(String codigo) async {
+    try {
+      final data = await supabase.client
+          .from('maquinaria')
+          .select('*')
+          .eq('codigo', codigo)
+          .single();
+
+      return Maquina.fromJson(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<Maquina>> buscarMaquinas(String query) async {
+    try {
+      final data = await supabase.client
+          .from('maquinaria')
+          .select('*')
+          .or('codigo.ilike.%$query%,nombre.ilike.%$query%,tipo.ilike.%$query%')
+          .order('nombre');
+
+      return data.map<Maquina>((json) => Maquina.fromJson(json)).toList();
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  // --- ACTUALIZACIONES ---
+  Future<void> _actualizarCampo(String codigo, String campo, dynamic valor) async {
+    try {
+      await supabase.client
+          .from('maquinaria')
+          .update({campo: valor})
+          .eq('codigo', codigo);
+    } catch (e) {
+      supabase.handleSupabaseError(e);
+      rethrow;
+    }
+  }
+
+  Future<void> actualizarKilometraje(String codigo, double valor) =>
+      _actualizarCampo(codigo, 'kilometraje', valor);
+
+  Future<void> actualizarHorometro(String codigo, double valor) =>
+      _actualizarCampo(codigo, 'horometro', valor);
+
+  Future<void> actualizarEstado(String codigo, String estado) =>
+      _actualizarCampo(codigo, 'estado', estado);
+
+  Future<void> actualizarObraActual(String codigo, int? obraId) =>
+      _actualizarCampo(codigo, 'obraActual', obraId);
+
+  // --- VERIFICACIONES ---
+  Future<bool> existeMaquina(String codigo) async {
+    try {
+      await supabase.client
+          .from('maquinaria')
+          .select('codigo')
+          .eq('codigo', codigo)
+          .single();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> maquinaEstaOperativa(String codigo) async {
+    try {
+      final data = await supabase.client
+          .from('maquinaria')
+          .select('estado')
+          .eq('codigo', codigo)
+          .single();
+      return data['estado'] == 'operativa';
+    } catch (e) {
+      return false;
+    }
+  }
 }
