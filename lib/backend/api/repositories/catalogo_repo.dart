@@ -1,6 +1,5 @@
 import '../supabase_manager.dart';
 import '../../schema/structs/catalogo/maquina.dart';
-import '../../schema/structs/catalogo/empleado.dart';
 import '../../schema/structs/catalogo/obras.dart';
 import '../../schema/structs/catalogo/repuestos.dart';
 import '../../schema/structs/catalogo/servicio.dart';
@@ -58,39 +57,6 @@ class CatalogoRepository {
     } catch (e) {
       // Si no encuentra, devuelve null (no error)
       return null;
-    }
-  }
-
-  //================================= EMPLEADOS =================================
-
-  Future<List<empleado>> getEmpleados() async {
-    try {
-      final data = await supabase.client
-          .from('empleados')
-          .select('ci, nombre, apellidoPaterno, apellidoMaterno')  // ← Solo los campos que necesitas
-          .order('nombre');
-
-      return data.map<empleado>((json) =>
-          empleado.fromJson(json)).toList();
-    } catch (e) {
-      supabase.handleSupabaseError(e);
-      rethrow;
-    }
-  }
-
-  Future<List<empleado>> buscarEmpleados(String query) async {
-    try {
-      final data = await supabase.client
-          .from('empleados')
-          .select('ci, nombre, apellidoPaterno, apellidoMaterno, rol, cargo')
-          .or('ci.ilike.%$query%,nombre.ilike.%$query%, apellidoPaterno.ilike.%$query%, apellidoMaterno.ilike.%$query%, rol.ilike.%$query%, cargo.ilike.%$query%')
-          .order('nombre');
-
-      return data.map<empleado>((json) =>
-          empleado.fromJson(json)).toList();
-    } catch (e) {
-      supabase.handleSupabaseError(e);
-      rethrow;
     }
   }
 

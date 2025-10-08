@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'backend/api/supabase_service.dart';
-import 'backend/schema/structs/catalogo/empleado.dart';
 import 'backend/schema/structs/catalogo/maquina.dart';
 import 'backend/schema/structs/catalogo/obras.dart';
 import 'backend/schema/structs/catalogo/repuestos.dart';
@@ -13,159 +12,235 @@ import 'flutter_flow/flutter_flow_util.dart';
 import 'backend/api/supabase_manager.dart';
 import 'backend/api/repositories/catalogo_repo.dart';
 import 'backend/api/services/catalogo_service.dart';
+import 'backend/api/repositories/reportes_repo.dart';
+import 'backend/api/services/reporte_service.dart';
 import 'backend/schema/structs/catalogo/descripcion_trabajo.dart';
-
 import 'package:cupertino_time_picker_hiuzb7/app_state.dart'
+
 as cupertino_time_picker_hiuzb7_app_state;
 
 // ↓ AÑADE ESTA FUNCIÓN DE PRUEBA
-Future<void> probarCRUDMaquinasOptimizado() async {
-  debugPrint('🧪 Probando CRUD OPTIMIZADO de Máquinas...');
+Future<void> probarCreacionReporteCombustible() async {
+  debugPrint('🧪 Probando CREACIÓN de Reporte Combustible...');
 
   try {
     // ✅ INICIALIZAR SUPABASE
-    if (!SupabaseService.isInitialized) {
-      debugPrint('1. 🚀 Inicializando Supabase...');
-      await SupabaseService.initialize();
-    }
-
+    debugPrint('1. 🚀 Inicializando Supabase...');
     final supabase = SupabaseManager();
     await supabase.ensureConnected();
     debugPrint('✅ Conexión establecida');
 
-    final catalogoRepo = CatalogoRepository(supabase);
-    final maquinaService = CatalogoService(catalogoRepo);
+    // 🔍 BUSCAR MÁQUINAS EXISTENTES (por CÓDIGO)
+    debugPrint('2. 🔍 Buscando máquinas existentes...');
+    final maquinasExistentes = await supabase.client
+        .from('maquinaria')
+        .select('codigo, nombre, obraActual')
+        .limit(5);
 
-    // 🏗️ OBTENER O EXISTENTE O CREAR UNA OBRA
-    debugPrint('2. 🔍 Buscando obra existente...');
-    int? obraPruebaId = await _usarObraExistente(supabase);
+    String maquinaCodigoParaPrueba;
+    String maquinaNombreParaPrueba;
 
-    // Si no hay obras existentes, crear una mínima
-    if (obraPruebaId == null) {
-      debugPrint('3. 🏗️ Creando obra mínima de prueba...');
-      obraPruebaId = await _crearObraMinima(supabase);
-    }
+    if (maquinasExistentes.isEmpty) {
+      debugPrint('⚠️ No hay máquinas en la base de datos');
+      debugPrint('🏗️ Creando obra y máquina temporal para prueba...');
 
-    if (obraPruebaId == null) {
-      debugPrint('❌ No se pudo obtener o crear obra - probando sin obra...');
-      // Continuar prueba sin obra asignada
-      obraPruebaId = null;
+      final maquinaTemporal = await _crearObraYMaquinaTemporal(supabase);
+      maquinaCodigoParaPrueba = maquinaTemporal['codigo']!;
+      maquinaNombreParaPrueba = maquinaTemporal['nombre']!;
+      debugPrint('✅ Obra y máquina temporal creadas: $maquinaNombreParaPrueba ($maquinaCodigoParaPrueba)');
     } else {
-      debugPrint('✅ Usando obra con ID: $obraPruebaId');
+      // Usar la primera máquina que exista (por CÓDIGO)
+      maquinaCodigoParaPrueba = maquinasExistentes.first['codigo'] as String;
+      maquinaNombreParaPrueba = maquinasExistentes.first['nombre'] as String;
+      final obraActual = maquinasExistentes.first['obraActual'];
+      debugPrint('✅ Usando máquina existente: $maquinaNombreParaPrueba ($maquinaCodigoParaPrueba)');
+      debugPrint('   - Obra asignada: $obraActual');
     }
 
-    // 🔄 LIMPIAR DATOS DE PRUEBA PREVIOS
-    debugPrint('4. 🧹 Limpiando datos de prueba previos...');
-    try {
-      await supabase.client
-          .from('maquinaria')
-          .delete()
-          .eq('codigo', 'TEST-MAQ-001');
-      debugPrint('✅ Datos previos limpiados');
-    } catch (e) {
-      debugPrint('⚠️ No se pudieron limpiar datos previos: $e');
-    }
+    final reporteRepo = ReporteRepository(supabase);
+    final reporteService = ReporteService(reporteRepo);
 
-    // Datos de prueba (puede ser con o sin obra)
-    final testMaquina = Maquina(
-      codigo: 'TEST-MAQ-001',
-      nombre: 'Máquina de Prueba CRUD',
-      kilometraje: 1000.5,
-      horometro: 500.75,
-      tipo: 'Excavadora',
-      propietario: 'Tecnopilotes',
-      combustible: 'Diesel',
-      estado: 'operativa',
-      obraActualId: obraPruebaId, // Puede ser null
-      tipoCambio: 7.85,
+    // ========== CREAR REPORTE ==========
+    debugPrint('3. ⛽ Creando reporte de combustible...');
+
+    await reporteService.crearReporteCombustible(
+      maquina: maquinaCodigoParaPrueba, // ← Usar el CÓDIGO
+      litros: 75.5,
+      costo: 325.75,
+      tipoCombustible: 'Diesel PRUEBA',
     );
 
-    // ========== CREATE ==========
-    debugPrint('5. 📝 Probando CREATE...');
-    try {
-      final insertResponse = await supabase.client
-          .from('maquinaria')
-          .insert(testMaquina.toJson())
-          .select();
+    debugPrint('✅ ✅ ✅ REPORTE CREADO EXITOSAMENTE!');
+    debugPrint('   - Máquina (código): $maquinaCodigoParaPrueba');
+    debugPrint('   - Máquina (nombre): $maquinaNombreParaPrueba');
+    debugPrint('   - Litros: 75.5 L');
+    debugPrint('   - Costo: \$325.75');
+    debugPrint('   - Tipo: Diesel PRUEBA');
 
-      debugPrint('✅ INSERT exitoso: ${insertResponse.length} máquinas insertadas');
+    // ✅ VERIFICACIÓN
+    debugPrint('4. 🔍 Verificando reporte creado...');
+    await Future.delayed(Duration(seconds: 1));
 
-      // Continuar con el resto de las pruebas...
-      final maquinaEncontrada = await maquinaService.getMaquinaPorCodigo('TEST-MAQ-001');
-      if (maquinaEncontrada != null) {
-        debugPrint('✅ READ exitoso: ${maquinaEncontrada.nombre}');
-        debugPrint('   - Obra asignada: ${maquinaEncontrada.obraActualId ?? "Ninguna"}');
-      }
+    final reporteCreado = await supabase.client
+        .from('cambioCombustible')
+        .select('nro, maquina, litros, costo, fecha')
+        .eq('maquina', maquinaCodigoParaPrueba)
+        .eq('tipo_combustible', 'Diesel PRUEBA')
+        .order('fecha', ascending: false)
+        .limit(1)
+        .single();
 
-      // Probar actualizaciones básicas
-      await maquinaService.actualizarKilometraje('TEST-MAQ-001', 1100.0);
-      debugPrint('✅ Actualización de kilometraje exitosa');
+    debugPrint('📊 Reporte verificado en BD:');
+    debugPrint('   - Nro asignado: ${reporteCreado['nro']}');
+    debugPrint('   - Máquina registrada: ${reporteCreado['maquina']}');
+    debugPrint('   - Litros: ${reporteCreado['litros']}L');
+    debugPrint('   - Costo: \$${reporteCreado['costo']}');
 
-      debugPrint('🎉 ¡PRUEBA COMPLETADA EXITOSAMENTE!');
-
-    } catch (e) {
-      debugPrint('❌ ERROR en operación: $e');
-    }
+    debugPrint('🎉 ¡PRUEBA EXITOSA! El flujo de reportes funciona correctamente');
 
   } catch (e) {
-    debugPrint('❌ ERROR GENERAL: $e');
+    debugPrint('❌ ERROR en prueba: $e');
+    debugPrint('💡 Detalles del error: ${e.toString()}');
   } finally {
-    // Limpieza...
-    debugPrint('6. 🧹 Limpiando datos de prueba...');
-    try {
-      final supabase = SupabaseManager();
-      await supabase.ensureConnected();
-
-      await supabase.client
-          .from('maquinaria')
-          .delete()
-          .eq('codigo', 'TEST-MAQ-001');
-
-      debugPrint('✅ Datos de prueba limpiados');
-    } catch (e) {
-      debugPrint('⚠️ Error limpiando datos: $e');
-    }
+    // ========== CLEANUP ==========
+    debugPrint('5. 🧹 Limpiando datos de prueba...');
+    await _limpiarDatosPrueba();
   }
 }
 
-// 🔨 MÉTODO PARA CREAR OBRA MÍNIMA (solo campo nombre)
-Future<int?> _crearObraMinima(SupabaseManager supabase) async {
+// 🏗️ MÉTODO PARA CREAR OBRA Y MÁQUINA TEMPORAL
+Future<Map<String, String>> _crearObraYMaquinaTemporal(SupabaseManager supabase) async {
   try {
-    final response = await supabase.client
+    // 1. PRIMERO CREAR UNA OBRA TEMPORAL
+    debugPrint('   🏗️ Creando obra temporal...');
+    final obraTemporal = {
+      'nombre': 'Obra Temporal Prueba',
+    };
+
+    final obraResponse = await supabase.client
         .from('obras')
-        .insert({
-      'nombre': 'Obra de Prueba CRUD', // Solo campo que debe existir
-    })
+        .insert(obraTemporal)
         .select('id')
         .single();
 
-    return response['id'] as int;
+    final obraId = obraResponse['id'] as int;
+    debugPrint('   ✅ Obra temporal creada con ID: $obraId');
+
+    // 2. LUEGO CREAR LA MÁQUINA TEMPORAL CON LA OBRA ASIGNADA
+    debugPrint('   🚜 Creando máquina temporal...');
+    const codigoMaquina = 'TEMP-PRUEBA-001';
+    const nombreMaquina = 'Excavadora Temporal Prueba';
+
+    final maquinaTemporal = {
+      'codigo': codigoMaquina,
+      'nombre': nombreMaquina,
+      'kilometraje': 1000.0,
+      'horometro': 500.0,
+      'tipo': 'Excavadora',
+      'propietario': 'Empresa Prueba',
+      'combustible': 'Diesel',
+      'estado': 'operativa',
+      'obraActual': obraId, // ← ASIGNAR LA OBRA CREADA
+      'tipoCambio': 1.0,
+    };
+
+    await supabase.client
+        .from('maquinaria')
+        .insert(maquinaTemporal);
+
+    debugPrint('   ✅ Máquina temporal creada con obra asignada');
+    return {
+      'codigo': codigoMaquina,
+      'nombre': nombreMaquina,
+    };
+
   } catch (e) {
-    debugPrint('❌ Error creando obra mínima: $e');
-    return null;
+    debugPrint('❌ Error creando obra y máquina temporal: $e');
+
+    // Fallback: buscar cualquier máquina existente que YA TENGA OBRA
+    try {
+      final maquinasConObra = await supabase.client
+          .from('maquinaria')
+          .select('codigo, nombre, obraActual')
+          .not('obraActual', 'is', null)
+          .limit(1);
+
+      if (maquinasConObra.isNotEmpty) {
+        final codigo = maquinasConObra.first['codigo'] as String;
+        final nombre = maquinasConObra.first['nombre'] as String;
+        final obraActual = maquinasConObra.first['obraActual'];
+        debugPrint('✅ Encontrada máquina con obra: $nombre ($codigo) - Obra: $obraActual');
+        return {
+          'codigo': codigo,
+          'nombre': nombre,
+        };
+      }
+    } catch (e2) {
+      debugPrint('❌ Error buscando máquinas con obra: $e2');
+    }
+
+    // Último fallback extremo - intentar con máquina sin obra (si la constraint lo permite)
+    try {
+      final maquinasCualquiera = await supabase.client
+          .from('maquinaria')
+          .select('codigo, nombre')
+          .limit(1);
+
+      if (maquinasCualquiera.isNotEmpty) {
+        final codigo = maquinasCualquiera.first['codigo'] as String;
+        final nombre = maquinasCualquiera.first['nombre'] as String;
+        debugPrint('⚠️ Usando máquina existente (puede fallar): $nombre ($codigo)');
+        return {
+          'codigo': codigo,
+          'nombre': nombre,
+        };
+      }
+    } catch (e3) {
+      debugPrint('❌ Error en fallback extremo: $e3');
+    }
+
+    throw Exception('No se pudo crear o encontrar una máquina válida con obra asignada');
   }
 }
 
-Future<int?> _usarObraExistente(SupabaseManager supabase) async {
+// 🧹 MÉTODO DE LIMPIEZA MEJORADO
+Future<void> _limpiarDatosPrueba() async {
   try {
-    // Buscar cualquier obra existente
-    final obrasExistentes = await supabase.client
-        .from('obras')
-        .select('id, nombre')
-        .limit(1);
+    final supabase = SupabaseManager();
+    await supabase.ensureConnected();
 
-    if (obrasExistentes.isNotEmpty) {
-      final obraId = obrasExistentes.first['id'] as int;
-      final obraNombre = obrasExistentes.first['nombre'] as String;
-      debugPrint('✅ Usando obra existente: $obraNombre (ID: $obraId)');
-      return obraId;
+    // 1. Limpiar reportes de prueba
+    final reportesEliminados = await supabase.client
+        .from('cambioCombustible')
+        .delete()
+        .eq('tipo_combustible', 'Diesel PRUEBA');
+
+    debugPrint('✅ Reportes de prueba limpiados: ${reportesEliminados.length} eliminados');
+
+    // 2. Limpiar máquina temporal (si existe)
+    try {
+      await supabase.client
+          .from('maquinaria')
+          .delete()
+          .eq('codigo', 'TEMP-PRUEBA-001');
+      debugPrint('✅ Máquina temporal limpiada');
+    } catch (e) {
+      debugPrint('ℹ️ Máquina temporal no existía');
     }
 
-    debugPrint('❌ No hay obras existentes en la base de datos');
-    return null;
+    // 3. Limpiar obra temporal (si existe)
+    try {
+      await supabase.client
+          .from('obras')
+          .delete()
+          .eq('nombre', 'Obra Temporal Prueba');
+      debugPrint('✅ Obra temporal limpiada');
+    } catch (e) {
+      debugPrint('ℹ️ Obra temporal no existía');
+    }
+
   } catch (e) {
-    debugPrint('❌ Error buscando obra existente: $e');
-    return null;
+    debugPrint('⚠️ Error en limpieza (puede ignorarse): $e');
   }
 }
 
@@ -181,7 +256,7 @@ void main() async {
     debugPrint('✅ Supabase inicializado correctamente en main');
 
     // ↓ AHORA SÍ EJECUTAR LAS PRUEBAS
-    await probarCRUDMaquinasOptimizado();
+    await probarCreacionReporteCombustible();
 
   } catch (e) {
     debugPrint('❌ ERROR CRÍTICO en inicialización: $e');
